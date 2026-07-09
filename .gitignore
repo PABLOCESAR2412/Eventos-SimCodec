@@ -24,3 +24,7 @@ pnpm-debug.log*
 .idea/
 
 .env.local
+
+.agents/
+AGENTS.md
+CLAUDE.md
