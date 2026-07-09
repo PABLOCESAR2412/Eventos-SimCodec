@@ -1,0 +1,65 @@
+export const languages = {
+  es: 'Español',
+  en: 'English',
+};
+
+export const defaultLang = 'es';
+
+export const ui = {
+  es: {
+    'hero.badge': 'Sistema Activo - {count} eventos en vivo',
+    'hero.title1': 'Ecosistema ',
+    'hero.title2': 'Tech',
+    'hero.title3': 'en Ecuador.',
+    'hero.subtitle': 'La plataforma definitiva y en tiempo real para encontrar meetups, talleres de IA, hackathons y conferencias web. Centralizando el conocimiento de las comunidades de desarrollo.',
+    'sidebar.filters': 'Filtros',
+    'sidebar.clear': 'Limpiar',
+    'sidebar.date': 'Fecha',
+    'sidebar.date.thisMonth': 'Este mes',
+    'sidebar.date.nextMonth': 'Próximo mes',
+    'sidebar.date.next3Months': 'Próximos 3 meses',
+    'sidebar.modality': 'Modalidad',
+    'sidebar.modality.inPerson': 'Presencial',
+    'sidebar.modality.virtual': 'Virtual',
+    'sidebar.cost': 'Costo',
+    'sidebar.cost.free': 'Gratis',
+    'sidebar.cost.paid': 'De pago',
+    'sidebar.location': 'Ubicación (Ciudad)',
+    'sidebar.category': 'Categoría Tech',
+    'main.title': 'Eventos Descubiertos',
+    'main.showing': 'Mostrando {count} resultados',
+    'card.live': 'EN VIVO AHORA',
+    'card.free': 'GRATIS',
+    'card.paid': 'DE PAGO',
+    'modal.close': 'Cerrar modal',
+    'modal.register': 'Inscribirse en el evento'
+  },
+  en: {
+    'hero.badge': 'Active System - {count} live events',
+    'hero.title1': '',
+    'hero.title2': 'Tech',
+    'hero.title3': ' Ecosystem in Ecuador.',
+    'hero.subtitle': 'The definitive real-time platform to find meetups, AI workshops, hackathons, and web conferences. Centralizing the knowledge of development communities.',
+    'sidebar.filters': 'Filters',
+    'sidebar.clear': 'Clear',
+    'sidebar.date': 'Date',
+    'sidebar.date.thisMonth': 'This month',
+    'sidebar.date.nextMonth': 'Next month',
+    'sidebar.date.next3Months': 'Next 3 months',
+    'sidebar.modality': 'Modality',
+    'sidebar.modality.inPerson': 'In-person',
+    'sidebar.modality.virtual': 'Virtual',
+    'sidebar.cost': 'Cost',
+    'sidebar.cost.free': 'Free',
+    'sidebar.cost.paid': 'Paid',
+    'sidebar.location': 'Location (City)',
+    'sidebar.category': 'Tech Category',
+    'main.title': 'Discovered Events',
+    'main.showing': 'Showing {count} results',
+    'card.live': 'LIVE NOW',
+    'card.free': 'FREE',
+    'card.paid': 'PAID',
+    'modal.close': 'Close modal',
+    'modal.register': 'Register for the event'
+  }
+} as const;

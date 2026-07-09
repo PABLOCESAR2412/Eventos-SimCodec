@@ -1,0 +1,242 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Sidebar from '../components/Sidebar.astro';
+import EventCard from '../components/EventCard.astro';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+import { convex } from '../lib/convex';
+import { api } from '../../convex/_generated/api';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// Extraer parámetros de búsqueda de la URL
+const searchTerm = Astro.url.searchParams.get('q') || undefined;
+const categoryParam = Astro.url.searchParams.get('category') || undefined;
+const isVirtualParam = Astro.url.searchParams.get('virtual') === 'true' ? true : undefined;
+const isFreeParam = Astro.url.searchParams.get('free') === 'true' ? true : undefined;
+
+// Fetch desde la base de datos Serverless (se traen todos los activos para filtrado dinámico local)
+const rawEvents = await convex.query(api.events.getActiveEvents, {
+  category: categoryParam,
+  isVirtual: isVirtualParam,
+  isFree: isFreeParam
+});
+
+const events = rawEvents.map((e: any) => ({
+  id: e._id,
+  title: e.title,
+  description: e.description,
+  url: e.registrationUrl,
+  source: e.source,
+  category: e.category,
+  location: { city: e.city || (e.isVirtual ? 'Virtual' : 'Presencial'), isVirtual: e.isVirtual, address: e.address },
+  date: { start: new Date(e.dateStart), end: e.dateEnd ? new Date(e.dateEnd) : undefined },
+  isLive: false, // O calcular aquí si e.dateStart <= Date.now() y endDate...
+  isFree: e.isFree,
+  price: e.price,
+  imageUrl: e.imageUrl
+}));
+
+const liveEventsCount = events.length; // Cambiado temporalmente al total de eventos
+---
+
+<Layout 
+  title="Eventos Tech Ecuador | Comunidad, Meetups y Conferencias" 
+  description="Plataforma centralizada en tiempo real de eventos, meetups, hackathons y conferencias de tecnología en Ecuador."
+>
+  <!-- Hero Section SimCodec Branded -->
+  <header class="relative pt-32 pb-20 px-6 lg:px-12 border-b border-[var(--border-color)] overflow-hidden bg-[var(--bg-color)] transition-colors duration-300">
+    <!-- SimCodec Geometric Background (Minimalist) -->
+    <div class="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none" style="background-image: radial-gradient(var(--color-sim-brand) 1px, transparent 1px); background-size: 24px 24px;"></div>
+    
+    <div class="max-w-[90rem] mx-auto relative z-10 flex flex-col items-center text-center">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[var(--color-sim-brand)]/30 bg-[var(--color-sim-brand)]/5 mb-8">
+        <span class="w-2 h-2 rounded-full bg-[var(--color-sim-brand)] animate-pulse shadow-[0_0_8px_var(--color-sim-brand)]"></span>
+        <span class="text-xs font-bold text-[var(--color-sim-brand)] tracking-wide uppercase">SIMCODEC EVENT PLATFORM</span>
+      </div>
+      
+      <h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 text-gray-900 dark:text-white leading-[1.1] transition-colors duration-300">
+        {t('hero.title1')}<span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-sim-primary)] to-[var(--color-sim-brand)] dark:from-[var(--color-sim-brand)] dark:to-teal-300 ml-3 transition-colors duration-300">{t('hero.title2')}</span><br />
+        {t('hero.title3')}
+      </h1>
+      
+      <p class="text-lg md:text-xl text-gray-700 dark:text-gray-400 max-w-2xl font-medium dark:font-light mb-10 transition-colors duration-300">
+        Plataforma B2B de Eventos Tecnológicos. Centralizando innovación, conferencias y hackathons globales.
+      </p>
+    </div>
+  </header>
+
+  <main class="max-w-[90rem] mx-auto px-6 lg:px-12 py-12 flex flex-col lg:flex-row gap-10">
+    <Sidebar />
+
+    <div class="flex-grow">
+      <!-- Barra de Búsqueda Dinámica -->
+      <div class="mb-10 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm transition-colors duration-300">
+        <div class="w-full relative flex items-center bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-800 rounded-xl focus-within:border-[var(--color-sim-action)] focus-within:ring-4 focus-within:ring-[var(--color-sim-action)]/20 transition-all duration-300 p-1.5">
+          <svg class="w-5 h-5 ml-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          <input 
+            type="text" 
+            id="global-search"
+            placeholder="Escribe para filtrar eventos, tecnologías o congresos instantáneamente..." 
+            class="flex-1 bg-transparent border-none outline-none px-4 py-2.5 text-gray-900 dark:text-white placeholder-gray-500 text-base font-medium"
+          />
+          <button id="clear-search" class="hidden bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white font-bold py-2.5 px-4 rounded-lg transition-colors duration-200 uppercase text-xs tracking-wider">
+            Borrar
+          </button>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-2xl font-bold text-[var(--text-color)] transition-colors duration-300">{t('main.title')}</h2>
+        <span id="results-count" class="text-sm font-medium text-gray-700 dark:text-gray-400 bg-gray-200 dark:bg-gray-800 px-3 py-1 rounded-full border border-gray-300 dark:border-[var(--border-color)] transition-colors duration-300" data-template={t('main.showing', { count: '{count}' })}>
+          {t('main.showing', { count: events.length })}
+        </span>
+      </div>
+
+      <div class="events-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {events.map((event) => (
+          <div 
+            class="event-wrapper opacity-0 translate-y-8"
+            data-city={event.location.city}
+            data-category={event.category}
+            data-modality={event.location.isVirtual ? 'virtual' : 'presential'}
+            data-cost={event.isFree ? 'free' : 'paid'}
+            data-date={event.date.start.getTime()}
+            data-search={`${event.title} ${event.description || ''} ${event.category} ${event.source}`.toLowerCase()}
+          >
+            <EventCard event={event} />
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Modal Component -->
+    <div id="event-modal" class="fixed inset-0 z-[200] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+      <div id="modal-backdrop" class="absolute inset-0 bg-black/50 dark:bg-black/80 backdrop-blur-sm cursor-pointer transition-colors duration-300"></div>
+      <div class="relative bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl transform scale-95 transition-all duration-300" id="modal-content">
+        <div id="modal-image-container" class="relative h-64 bg-gray-100 dark:bg-gray-800 transition-colors duration-300">
+          <img id="modal-img" src="" alt="Imagen del evento" class="w-full h-full object-cover" />
+          <button id="close-modal" class="absolute top-4 right-4 bg-white/80 dark:bg-black/50 text-gray-800 dark:text-white hover:bg-white dark:hover:bg-black/80 p-2 rounded-full backdrop-blur-sm transition-colors z-10" aria-label={t('modal.close')}>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+        <div class="p-8">
+          <div class="flex gap-3 mb-4">
+            <span id="modal-city" class="text-xs font-semibold uppercase text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-400/10 px-2.5 py-1 rounded-md border border-blue-200 dark:border-transparent"></span>
+            <span id="modal-price" class="text-xs font-semibold uppercase px-2.5 py-1 rounded-md"></span>
+          </div>
+          <h2 id="modal-title" class="text-3xl font-bold text-[var(--text-color)] mb-2 leading-tight transition-colors duration-300"></h2>
+          <p id="modal-date" class="text-sm text-gray-600 dark:text-gray-400 mb-6 font-medium capitalize-first transition-colors duration-300"></p>
+          <p id="modal-desc" class="text-gray-700 dark:text-gray-300 leading-relaxed mb-6 transition-colors duration-300"></p>
+          
+          <div class="bg-gray-100 dark:bg-gray-800/50 rounded-lg p-5 mb-8 border border-gray-300 dark:border-[var(--border-color)] transition-colors duration-300">
+            <h3 class="text-sm font-bold text-[var(--text-color)] uppercase tracking-wider mb-3 flex items-center gap-2 transition-colors duration-300">
+              <svg class="w-4 h-4 text-[var(--color-sim-brand)] transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              Pasos para Inscribirse
+            </h3>
+            <ol class="list-decimal list-inside space-y-2 text-sm text-gray-700 dark:text-gray-300 transition-colors duration-300">
+              <li>Haz clic en el botón <strong class="text-[var(--color-sim-action)]">Completar Registro</strong> de abajo.</li>
+              <li>Serás redirigido a la plataforma oficial del organizador.</li>
+              <li>Busca el botón "Join", "Registrarse" o "Buy Tickets" en su web.</li>
+              <li>Llena el formulario con tus datos corporativos si es requerido.</li>
+            </ol>
+          </div>
+          
+          <div class="flex justify-end pt-4 border-t border-[var(--border-color)]">
+            <a id="modal-link" href="#" target="_blank" rel="noopener noreferrer" class="bg-[var(--color-sim-action)] hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg shadow-[var(--color-sim-action)]/20 transition-all hover:scale-105 flex items-center gap-2">
+              Completar Registro
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    import { gsap } from 'gsap';
+    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Animación de entrada
+      gsap.to('.event-wrapper', {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '.events-grid',
+          start: 'top 85%',
+        }
+      });
+
+      // Contador
+      document.addEventListener('filters:changed', (e: any) => {
+        const countEl = document.getElementById('results-count');
+        if (countEl) {
+          const template = countEl.dataset.template || 'Mostrando {count} resultados';
+          countEl.textContent = template.replace('{count}', e.detail.count);
+        }
+      });
+
+      // Modal Logic
+      const modal = document.getElementById('event-modal');
+      const modalBackdrop = document.getElementById('modal-backdrop');
+      const closeModalBtn = document.getElementById('close-modal');
+      const modalContent = document.getElementById('modal-content');
+      
+      const openModal = (btn: HTMLElement) => {
+        if (!modal || !modalContent) return;
+        
+        const { title, desc, url, image, city, price, date } = btn.dataset;
+        
+        document.getElementById('modal-title')!.textContent = title || '';
+        document.getElementById('modal-desc')!.textContent = desc || '';
+        document.getElementById('modal-city')!.textContent = city || '';
+        document.getElementById('modal-date')!.textContent = date || '';
+        
+        const priceEl = document.getElementById('modal-price')!;
+        priceEl.textContent = price || '';
+        if (price === 'GRATIS' || price === 'FREE') {
+          priceEl.className = 'text-xs font-semibold uppercase text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded-md';
+        } else {
+          priceEl.className = 'text-xs font-semibold uppercase text-blue-400 bg-blue-400/10 px-2.5 py-1 rounded-md';
+        }
+
+        const imgContainer = document.getElementById('modal-image-container')!;
+        if (image) {
+          imgContainer.style.display = 'block';
+          (document.getElementById('modal-img') as HTMLImageElement).src = image;
+        } else {
+          imgContainer.style.display = 'none';
+        }
+        
+        (document.getElementById('modal-link') as HTMLAnchorElement).href = url || '#';
+        
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modalContent.classList.remove('scale-95');
+        modalContent.classList.add('scale-100');
+        document.body.style.overflow = 'hidden';
+      };
+
+      const closeModal = () => {
+        if (!modal || !modalContent) return;
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modalContent.classList.remove('scale-100');
+        modalContent.classList.add('scale-95');
+        document.body.style.overflow = '';
+      };
+
+      document.querySelectorAll('.open-modal-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          openModal(btn as HTMLElement);
+        });
+      });
+
+      if (modalBackdrop) modalBackdrop.addEventListener('click', closeModal);
+      if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+    });
+  </script>
+</Layout>

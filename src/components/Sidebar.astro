@@ -1,0 +1,242 @@
+---
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const cities = ['Quito', 'Guayaquil', 'Cuenca', 'Virtual'];
+const categories = ['Web Development', 'AI & Data Science', 'Cybersecurity', 'Cloud & DevOps', 'Design & UX', 'Entrepreneurship', 'Education'];
+const modalities = [
+  { label: t('sidebar.modality.inPerson'), value: 'presential' },
+  { label: t('sidebar.modality.virtual'), value: 'virtual' }
+];
+const costs = [
+  { label: t('sidebar.cost.free'), value: 'free' },
+  { label: t('sidebar.cost.paid'), value: 'paid' }
+];
+const dates = [
+  { label: t('sidebar.date.thisMonth'), value: 'this-month' },
+  { label: t('sidebar.date.nextMonth'), value: 'next-month' },
+  { label: t('sidebar.date.next3Months'), value: 'next-3-months' }
+];
+---
+
+<aside class="w-full lg:w-72 flex-shrink-0 lg:sticky lg:top-28 z-10 h-fit space-y-6">
+  
+  <div class="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-6 backdrop-blur-sm shadow-lg shadow-[var(--color-sim-primary)]/5 transition-colors duration-300">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-bold text-[var(--text-color)] flex items-center gap-2 transition-colors duration-300">
+        <svg class="w-5 h-5 text-[var(--color-sim-action)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+        {t('sidebar.filters')}
+      </h2>
+      <button id="clear-filters" class="text-xs text-[var(--color-sim-orange)] hover:text-orange-500 transition-colors font-semibold hidden">
+        {t('sidebar.clear')}
+      </button>
+    </div>
+
+    <!-- Filtro de Fecha -->
+    <div class="mb-6">
+      <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{t('sidebar.date')}</h3>
+      <div class="space-y-2">
+        {dates.map(date => (
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <div class="relative flex items-center">
+              <input type="radio" class="peer sr-only filter-input" name="date" value={date.value} />
+              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded-full bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
+              <div class="absolute w-2 h-2 bg-white rounded-full left-1.5 top-1.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity"></div>
+            </div>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-[var(--color-sim-action)] transition-colors">{date.label}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+
+    <hr class="border-neutral-800 my-4" />
+
+    <!-- Filtro de Modalidad -->
+    <div class="mb-6">
+      <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{t('sidebar.modality')}</h3>
+      <div class="space-y-2">
+        {modalities.map(mod => (
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <div class="relative flex items-center">
+              <input type="checkbox" class="peer sr-only filter-input" name="modality" value={mod.value} />
+              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
+              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-[var(--color-sim-action)] transition-colors">{mod.label}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+
+    <hr class="border-neutral-800 my-4" />
+
+    <!-- Filtro de Costo -->
+    <div class="mb-6">
+      <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{t('sidebar.cost')}</h3>
+      <div class="space-y-2">
+        {costs.map(cost => (
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <div class="relative flex items-center">
+              <input type="checkbox" class="peer sr-only filter-input" name="cost" value={cost.value} />
+              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
+              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-[var(--color-sim-action)] transition-colors">{cost.label}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+
+    <hr class="border-neutral-800 my-4" />
+
+    <!-- Filtro de Ciudad -->
+    <div class="mb-6">
+      <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{t('sidebar.location')}</h3>
+      <div class="space-y-2">
+        {cities.map(city => (
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <div class="relative flex items-center">
+              <input type="checkbox" class="peer sr-only filter-input" name="city" value={city} />
+              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
+              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-[var(--color-sim-action)] transition-colors">{city}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+
+    <hr class="border-neutral-800 my-4" />
+
+    <!-- Filtro de Categorías -->
+    <div>
+      <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{t('sidebar.category')}</h3>
+      <div class="space-y-2">
+        {categories.map(category => (
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <div class="relative flex items-center">
+              <input type="checkbox" class="peer sr-only filter-input" name="category" value={category} />
+              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
+              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-[var(--color-sim-action)] transition-colors">{category}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  </div>
+</aside>
+
+<script>
+  // Filter Logic
+  document.addEventListener('DOMContentLoaded', () => {
+    const inputs = document.querySelectorAll('.filter-input') as NodeListOf<HTMLInputElement>;
+    const clearBtn = document.getElementById('clear-filters');
+    
+    function applyFilters() {
+      const selectedCities = Array.from(document.querySelectorAll('input[name="city"]:checked')).map(el => (el as HTMLInputElement).value);
+      const selectedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked')).map(el => (el as HTMLInputElement).value);
+      const selectedModalities = Array.from(document.querySelectorAll('input[name="modality"]:checked')).map(el => (el as HTMLInputElement).value);
+      const selectedCosts = Array.from(document.querySelectorAll('input[name="cost"]:checked')).map(el => (el as HTMLInputElement).value);
+      
+      const dateFilterEl = document.querySelector('input[name="date"]:checked') as HTMLInputElement;
+      const selectedDate = dateFilterEl ? dateFilterEl.value : null;
+
+      const searchInput = document.getElementById('global-search') as HTMLInputElement;
+      const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
+      const clearSearchBtn = document.getElementById('clear-search');
+
+      if (clearSearchBtn) {
+        if (searchVal.length > 0) clearSearchBtn.classList.remove('hidden');
+        else clearSearchBtn.classList.add('hidden');
+      }
+
+      const hasFilters = selectedCities.length || selectedCategories.length || selectedModalities.length || selectedCosts.length || selectedDate || searchVal.length > 0;
+      if (clearBtn) {
+        if (hasFilters) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+      }
+
+      const wrappers = document.querySelectorAll('.event-wrapper') as NodeListOf<HTMLElement>;
+      let visibleCount = 0;
+
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+
+      wrappers.forEach(wrapper => {
+        const city = wrapper.dataset.city || '';
+        const category = wrapper.dataset.category || '';
+        const modality = wrapper.dataset.modality || '';
+        const cost = wrapper.dataset.cost || '';
+        const timestamp = parseInt(wrapper.dataset.date || '0', 10);
+        const eventDate = new Date(timestamp);
+        
+        let matchCity = selectedCities.length === 0 || selectedCities.includes(city) || (city === 'Virtual' && selectedCities.includes('Virtual'));
+        let matchCategory = selectedCategories.length === 0 || selectedCategories.includes(category);
+        let matchModality = selectedModalities.length === 0 || selectedModalities.includes(modality);
+        let matchCost = selectedCosts.length === 0 || selectedCosts.includes(cost);
+        
+        let matchDate = true;
+        if (selectedDate === 'this-month') {
+          matchDate = eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear;
+        } else if (selectedDate === 'next-month') {
+          const nextMonth = (currentMonth + 1) % 12;
+          const targetYear = nextMonth === 0 ? currentYear + 1 : currentYear;
+          matchDate = eventDate.getMonth() === nextMonth && eventDate.getFullYear() === targetYear;
+        } else if (selectedDate === 'next-3-months') {
+          const threeMonthsFromNow = new Date(now);
+          threeMonthsFromNow.setMonth(now.getMonth() + 3);
+          matchDate = eventDate >= now && eventDate <= threeMonthsFromNow;
+        }
+
+        const searchableText = wrapper.dataset.search || '';
+        const matchSearch = searchVal === '' || searchableText.includes(searchVal);
+
+        const isVisible = matchCity && matchCategory && matchModality && matchCost && matchDate && matchSearch;
+        
+        if (isVisible) {
+          wrapper.style.display = 'block';
+          wrapper.animate([
+            { opacity: 0, transform: 'scale(0.95)' },
+            { opacity: 1, transform: 'scale(1)' }
+          ], { duration: 300, easing: 'ease-out' });
+          visibleCount++;
+        } else {
+          wrapper.style.display = 'none';
+        }
+      });
+
+      document.dispatchEvent(new CustomEvent('filters:changed', { detail: { count: visibleCount } }));
+    }
+
+    inputs.forEach(input => {
+      input.addEventListener('change', applyFilters);
+    });
+
+    const globalSearch = document.getElementById('global-search');
+    if (globalSearch) {
+      globalSearch.addEventListener('input', applyFilters);
+    }
+    
+    const clearSearchBtn = document.getElementById('clear-search');
+    if (clearSearchBtn && globalSearch) {
+      clearSearchBtn.addEventListener('click', () => {
+        (globalSearch as HTMLInputElement).value = '';
+        applyFilters();
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        inputs.forEach(input => {
+          if (input.type === 'radio' || input.type === 'checkbox') input.checked = false;
+        });
+        if (globalSearch) (globalSearch as HTMLInputElement).value = '';
+        applyFilters();
+      });
+    }
+  });
+</script>

@@ -1,0 +1,71 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+/* Habilitar modo oscuro por clase en Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-sim-brand: #038875;
+  --color-sim-primary: #053C5E;
+  --color-sim-orange: #FF8025;
+  --color-sim-ink: #0F172A;
+  --color-sim-action: #0055FF;
+  
+  --color-sim-bg-light: #F8F9FA;
+  --color-sim-bg-dark: #0A0A0C;
+  --color-sim-border-light: #E2E8F0;
+  --color-sim-border-dark: #1E293B;
+  
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+@layer base {
+  :root {
+    --bg-color: var(--color-sim-bg-light);
+    --text-color: var(--color-sim-ink);
+    --border-color: var(--color-sim-border-light);
+    --card-bg: #FFFFFF;
+  }
+
+  .dark {
+    --bg-color: var(--color-sim-bg-dark);
+    --text-color: #F8F9FA;
+    --border-color: var(--color-sim-border-dark);
+    --card-bg: #111827; /* Dark slate */
+  }
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-sans);
+  }
+
+
+  /* SimCodec Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg-color);
+    border-left: 1px solid var(--border-color);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-sim-primary);
+    border-radius: 4px;
+    border: 2px solid var(--bg-color);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-sim-brand);
+  }
+
+  /* For Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-sim-primary) var(--bg-color);
+  }
+}
