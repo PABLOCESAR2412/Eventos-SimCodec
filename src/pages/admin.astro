@@ -12,7 +12,7 @@ const sortedEvents = [...events].sort((a, b) => a.dateStart - b.dateStart);
 const validEvents = events.filter(e => e.isLinkValid).length;
 const brokenEvents = events.length - validEvents;
 const now = Date.now();
-
+---
 
 <Layout title="SimCodec | Admin Dashboard" description="Panel de control B2B para monitoreo de eventos y scrapers.">
   <div class="max-w-7xl mx-auto px-6 py-12 relative min-h-screen">
