@@ -53,7 +53,8 @@ export const getActiveEvents = query({
 // Guardar eventos recolectados por el Action Scraper
 export const saveEvents = internalMutation({
   args: {
-    events: v.array(v.any())
+    events: v.array(v.any()),
+    details: v.optional(v.string())
   },
   handler: async (ctx, args) => {
     let added = 0;
@@ -74,6 +75,7 @@ export const saveEvents = internalMutation({
       taskName: "syncAllSources",
       status: "SUCCESS",
       eventsAdded: added,
+      details: args.details,
       executedAt: Date.now(),
     });
   }

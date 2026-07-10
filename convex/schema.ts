@@ -60,6 +60,7 @@ export default defineSchema({
     status: v.string(),
     eventsAdded: v.number(),
     errorMessage: v.optional(v.string()),
+    details: v.optional(v.string()),
     executedAt: v.number(),
   }),
 });

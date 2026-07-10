@@ -316,7 +316,11 @@ export const syncAllSources = action({
 
     // Run Internal Mutation to save all extracted events
     if (eventsToSave.length > 0) {
-      await ctx.runMutation(internal.events.saveEvents, { events: eventsToSave });
+      const details = "Fuentes consultadas:\n- Dev.to\n- Eventbrite (Ecuador & Global)\n- Devpost (Hackathons globales)\n- Meetup (.NET, AWS, Quito Tech)\n- Google News Ecuador (Múltiples consultas masivas)\n- Universidades (EPN, ESPOL, UCE)\n- Cámara de Innovación y Tecnología Ecuatoriana (CITEC)";
+      await ctx.runMutation(internal.events.saveEvents, { 
+        events: eventsToSave,
+        details: details
+      });
     }
   }
 });
