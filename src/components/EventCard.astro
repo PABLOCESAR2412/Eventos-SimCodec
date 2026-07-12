@@ -12,14 +12,6 @@ const { title, description, category, location, date, imageUrl, source, isLive, 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
-const formattedDate = date.start.toLocaleDateString(lang === 'es' ? 'es-EC' : 'en-US', {
-  weekday: 'long',
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit'
-});
 ---
 
 <article class="event-card group relative bg-[var(--card-bg)] border border-[var(--border-color)] rounded-xl overflow-hidden hover:border-[var(--color-sim-brand)] hover:shadow-lg transition-all duration-300 flex flex-col h-full">
@@ -34,7 +26,7 @@ const formattedDate = date.start.toLocaleDateString(lang === 'es' ? 'es-EC' : 'e
     data-image={event.imageUrl || ''}
     data-city={event.location.city}
     data-price={event.isFree ? 'GRATIS' : (event.price || 'DE PAGO')}
-    data-date={event.date.start.toLocaleDateString('es-EC', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' })}
+    data-date={!isNaN(event.date.start.getTime()) ? event.date.start.toLocaleDateString('es-EC', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' }) : 'Fecha por confirmar'}
   ></button>
 
   <!-- Image Section -->
@@ -64,7 +56,7 @@ const formattedDate = date.start.toLocaleDateString(lang === 'es' ? 'es-EC' : 'e
         ) : (
           <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/90 dark:bg-black/80 backdrop-blur-md border border-gray-300 dark:border-[var(--color-sim-brand)] text-gray-800 dark:text-white text-[10px] font-bold tracking-wider uppercase shadow-md line-clamp-1 max-w-[200px] sm:max-w-none text-left">
             <svg class="w-3 h-3 text-[var(--color-sim-brand)] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            <span class="truncate">{event.date.start.toLocaleDateString('es-EC', { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' })}</span>
+            <span class="truncate">{!isNaN(event.date.start.getTime()) ? event.date.start.toLocaleDateString('es-EC', { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' }) : 'TBD'}</span>
           </span>
         )}
       </div>
@@ -131,8 +123,8 @@ const formattedDate = date.start.toLocaleDateString(lang === 'es' ? 'es-EC' : 'e
   "@type": "Event",
   "name": event.title,
   "description": event.description || "Evento tecnológico destacado.",
-  "startDate": event.date.start.toISOString(),
-  "endDate": event.date.end ? event.date.end.toISOString() : undefined,
+  "startDate": (event.date.start && !isNaN(event.date.start.getTime())) ? event.date.start.toISOString() : undefined,
+  "endDate": (event.date.end && !isNaN(event.date.end.getTime())) ? event.date.end.toISOString() : undefined,
   "eventAttendanceMode": event.location.isVirtual ? "https://schema.org/OnlineEventAttendanceMode" : "https://schema.org/OfflineEventAttendanceMode",
   "eventStatus": "https://schema.org/EventScheduled",
   "location": event.location.isVirtual ? {
