@@ -70,8 +70,8 @@ const now = Date.now();
             <span class="bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 text-[9px] px-2 py-0.5 rounded font-black uppercase">APIs & RSS</span>
           </div>
           <div>
-            <div class="text-2xl font-black text-gray-900 dark:text-white font-mono">11 Endpoints</div>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate" title="Eventbrite, Meetup, Dev.to, Google News, CITEC, EPN, ESPOL, UCE, Devpost">Eventbrite, Meetup, Dev.to, CITEC, EPN...</p>
+            <div class="text-2xl font-black text-gray-900 dark:text-white font-mono">35+ Endpoints</div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate" title="Luma, Eventbrite, MLH, Coursera, OpenAI, AWS, Startups, DAAD, ESPOL, EPN...">Luma, Coursera, OpenAI, AWS, DAAD...</p>
           </div>
         </div>
 
@@ -134,17 +134,17 @@ const now = Date.now();
                     <span class="font-bold text-gray-900 dark:text-white bg-[var(--color-sim-action)]/10 dark:bg-[var(--color-sim-action)]/20 px-2 py-0.5 rounded text-xs">{log.eventsAdded}</span>
                   </div>
                 )}
-                {log.taskName === 'syncAllSources' && (
+                {log.taskName.startsWith('sync') && (
                   <div class="text-[10px] text-gray-600 dark:text-gray-400 bg-blue-50/50 dark:bg-blue-900/10 px-3 py-2 rounded-lg border border-blue-100 dark:border-blue-800/30 whitespace-pre-line leading-relaxed font-mono">
-                    <strong>Fuentes Consultadas:</strong>
+                    <strong>Ruta de Integración:</strong>
                     <ul class="list-disc list-inside mt-1 space-y-0.5 ml-1">
-                      <li>Dev.to (API)</li>
-                      <li>Eventbrite Ecuador & Global (Scraping)</li>
-                      <li>Devpost Hackathons (API)</li>
-                      <li>Meetup (.NET, AWS, Quito Tech)</li>
-                      <li>Google News Ecuador (RSS)</li>
-                      <li>Universidades (EPN, ESPOL, UCE)</li>
-                      <li>Cámara de Innovación (CITEC)</li>
+                      <li>Devpost, Luma & Coursera (APIs Oficiales)</li>
+                      <li>Eventbrite (Estructurado Web Scraper)</li>
+                      <li>IA & Cloud (OpenAI, AWS, Google AI RSS)</li>
+                      <li>Venture & Startups (Techstars, FI, Activate)</li>
+                      <li>Educación & Becas (DAAD, edX, Fulbright)</li>
+                      <li>Google News Fallback (Ecuador, MLH, Pretalx)</li>
+                      <li>Universidades Nacionales (Web Scraping)</li>
                     </ul>
                   </div>
                 )}
