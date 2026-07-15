@@ -9,6 +9,8 @@ import { api } from '../../convex/_generated/api';
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 
+Astro.response.headers.set('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=120');
+
 // Extraer parámetros de búsqueda de la URL
 const searchTerm = Astro.url.searchParams.get('q') || undefined;
 const categoryParam = Astro.url.searchParams.get('category') || undefined;
