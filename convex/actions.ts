@@ -2,6 +2,9 @@ import { action } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { DevpostProvider } from "./providers/DevpostProvider";
 import { CourseraProvider } from "./providers/CourseraProvider";
+import { LumaProvider } from "./providers/LumaProvider";
+import { EventbriteProvider } from "./providers/EventbriteProvider";
+import { GenericRssProvider } from "./providers/GenericRssProvider";
 
 const now = Date.now();
 
@@ -29,6 +32,15 @@ export const syncApiSources = action({
       eventsToSave.push(...coursera.normalizarDatos(courseraRaw));
     } catch (e) {
       console.error("Error al procesar CourseraProvider:", e);
+    }
+
+    // Luma
+    try {
+      const luma = new LumaProvider();
+      const lumaRaw = await luma.obtenerOportunidades();
+      eventsToSave.push(...luma.normalizarDatos(lumaRaw));
+    } catch (e) {
+      console.error("Error al procesar LumaProvider:", e);
     }
 
     // Dev.to (Inline api, to be moved to Provider)
@@ -80,6 +92,15 @@ export const syncRssSources = action({
   args: {},
   handler: async (ctx) => {
     const eventsToSave = [];
+
+    // Generic RSS Provider (AWS, Azure, OpenAI, Techstars, Becas, etc)
+    try {
+      const genericRss = new GenericRssProvider();
+      const rssRaw = await genericRss.obtenerOportunidades();
+      eventsToSave.push(...genericRss.normalizarDatos(rssRaw));
+    } catch (e) {
+      console.error("Error al procesar GenericRssProvider:", e);
+    }
 
     const scrapeMeetup = async (groupName: string) => {
       try {
@@ -193,64 +214,14 @@ export const syncScrapingSources = action({
   handler: async (ctx) => {
     const eventsToSave = [];
 
-    const scrapeEventbrite = async (url: string, isVirtual: boolean, category: string, country: string) => {
-      try {
-        const ebRes = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-        if (ebRes.ok) {
-          const html = await ebRes.text();
-          const regex = /window\.__SERVER_DATA__ = ({.*?});/s;
-          const match = regex.exec(html);
-          if (match && match.length >= 2) {
-            const data = JSON.parse(match[1]);
-            if (data.jsonld && data.jsonld.length > 0) {
-              const itemList = data.jsonld[0]?.itemListElement || [];
-              for (const el of itemList) {
-                const item = el.item;
-                if (!item || !item.name) continue;
-                
-                const eventDate = new Date(item.startDate).getTime();
-                const endOfNextYear = new Date(new Date().getFullYear() + 1, 11, 31).getTime();
-                if (eventDate < now || eventDate > endOfNextYear) continue; 
-                
-                const isFree = (item.offers && item.offers.price === 0) || (item.description?.toLowerCase().includes('free'));
-                let priceStr = undefined;
-                if (!isFree && item.offers && item.offers.price) {
-                  priceStr = `${item.offers.price} ${item.offers.priceCurrency || 'USD'}`;
-                } else if (!isFree) {
-                  priceStr = "Consultar valor";
-                }
-                
-                eventsToSave.push({
-                  externalId: `eventbrite-${item.url}`,
-                  title: item.name,
-                  description: item.description?.substring(0, 200) || "Tech Event",
-                  dateStart: eventDate,
-                  country: country,
-                  city: isVirtual ? "Virtual" : "Varias",
-                  isVirtual: isVirtual,
-                  isHybrid: false,
-                  category: category,
-                  isFree: !!isFree,
-                  price: priceStr,
-                  registrationUrl: item.url,
-                  status: "PUBLISHED",
-                  language: country === "Ecuador" ? "es" : "en",
-                  tags: [],
-                  source: "Eventbrite",
-                  isLinkValid: true,
-                  imageUrl: item.image,
-                });
-              }
-            }
-          }
-        }
-      } catch (e) {
-        console.error("Error scraping Eventbrite", url, e);
-      }
-    };
-
-    await scrapeEventbrite('https://www.eventbrite.com/d/online/science-and-tech--events/', true, 'Eventos', 'Global');
-    await scrapeEventbrite('https://www.eventbrite.com/d/ecuador/science-and-tech--events/', false, 'Emprendimiento', 'Ecuador');
+    // Eventbrite
+    try {
+      const eb = new EventbriteProvider();
+      const ebRaw = await eb.obtenerOportunidades();
+      eventsToSave.push(...eb.normalizarDatos(ebRaw));
+    } catch (e) {
+      console.error("Error al procesar EventbriteProvider:", e);
+    }
 
     const scrapeWordPressEvents = async (baseUrl: string, sourceName: string) => {
       try {
