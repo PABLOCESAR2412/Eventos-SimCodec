@@ -14,8 +14,7 @@ export const getActiveEvents = query({
     const now = Date.now();
     let eventsQuery = ctx.db
       .query("events")
-      .withIndex("by_date", (q) => q.gte("dateStart", now))
-      .filter((q) => q.eq(q.field("status"), "PUBLISHED"))
+      .withIndex("by_status", (q) => q.eq("status", "PUBLISHED"))
       .filter((q) => q.eq(q.field("isLinkValid"), true));
 
     if (args.category) {
@@ -31,14 +30,19 @@ export const getActiveEvents = query({
       eventsQuery = eventsQuery.filter(q => q.eq(q.field("city"), args.city));
     }
 
-    const events = await eventsQuery.collect();
+    const allEvents = await eventsQuery.collect();
 
-    let result = events;
+    // Filtramos en memoria los eventos que realmente ya terminaron.
+    // Un evento sigue activo si su dateEnd >= ahora, o si no tiene dateEnd, le damos 24 horas de gracia desde dateStart.
+    let result = allEvents.filter(e => {
+      if (e.dateEnd) return e.dateEnd >= now;
+      return e.dateStart >= now - (24 * 60 * 60 * 1000);
+    });
     
     // Búsqueda por texto (Search Engine local)
     if (args.searchTerm) {
       const term = args.searchTerm.toLowerCase();
-      result = events.filter(e => 
+      result = result.filter(e => 
         e.title.toLowerCase().includes(term) || 
         e.description.toLowerCase().includes(term) ||
         (e.organizer && e.organizer.toLowerCase().includes(term))
