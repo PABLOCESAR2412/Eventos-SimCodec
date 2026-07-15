@@ -6,6 +6,18 @@ const t = useTranslations(lang);
 
 const cities = ['Quito', 'Guayaquil', 'Cuenca', 'Virtual'];
 const categories = ['Eventos', 'Formación', 'Competencias', 'Emprendimiento', 'Financiamiento', 'Comunidad', 'Empleo'];
+
+// Subcategorías / Temas
+const topics = [
+  'IA', 'Cloud', 'Startups', 'Becas', 'Ecuador', 'Hackathons', 'Cursos'
+];
+
+// Orígenes (Fuentes)
+const sources = [
+  'Eventbrite', 'Luma', 'Devpost', 'MLH', 'Coursera', 'edX', 'AWS', 'Google Cloud', 
+  'Azure', 'OpenAI', 'HuggingFace', 'Startup Grind', 'Techstars', 'Fulbright', 'EPN', 'ESPOL'
+];
+
 const modalities = [
   { label: t('sidebar.modality.inPerson'), value: 'presential' },
   { label: t('sidebar.modality.virtual'), value: 'virtual' }
@@ -21,10 +33,10 @@ const dates = [
 ];
 ---
 
-<aside class="w-full lg:w-72 flex-shrink-0 lg:sticky lg:top-28 z-10 h-fit space-y-6">
+<aside class="w-full lg:w-72 flex-shrink-0 lg:sticky lg:top-28 z-10 h-fit space-y-6 max-h-[85vh] overflow-y-auto custom-scrollbar pr-2 pb-10">
   
   <div class="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-6 backdrop-blur-sm shadow-lg shadow-[var(--color-sim-primary)]/5 transition-colors duration-300">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between mb-4 sticky top-0 bg-[var(--card-bg)] z-10 py-2">
       <h2 class="text-lg font-bold text-[var(--text-color)] flex items-center gap-2 transition-colors duration-300">
         <svg class="w-5 h-5 text-[var(--color-sim-action)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
         {t('sidebar.filters')}
@@ -34,100 +46,177 @@ const dates = [
       </button>
     </div>
 
-    <!-- Filtro de Fecha -->
-    <div class="mb-6">
-      <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{t('sidebar.date')}</h3>
-      <div class="space-y-2">
-        {dates.map(date => (
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <div class="relative flex items-center">
-              <input type="radio" class="peer sr-only filter-input" name="date" value={date.value} />
-              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded-full bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
-              <div class="absolute w-2 h-2 bg-white rounded-full left-1.5 top-1.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity"></div>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-[var(--color-sim-action)] transition-colors">{date.label}</span>
-          </label>
-        ))}
-      </div>
-    </div>
-
-    <hr class="border-neutral-800 my-4" />
-
-    <!-- Filtro de Modalidad -->
-    <div class="mb-6">
-      <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{t('sidebar.modality')}</h3>
-      <div class="space-y-2">
-        {modalities.map(mod => (
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <div class="relative flex items-center">
-              <input type="checkbox" class="peer sr-only filter-input" name="modality" value={mod.value} />
-              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
-              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-[var(--color-sim-action)] transition-colors">{mod.label}</span>
-          </label>
-        ))}
-      </div>
-    </div>
-
-    <hr class="border-neutral-800 my-4" />
-
-    <!-- Filtro de Costo -->
-    <div class="mb-6">
-      <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{t('sidebar.cost')}</h3>
-      <div class="space-y-2">
-        {costs.map(cost => (
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <div class="relative flex items-center">
-              <input type="checkbox" class="peer sr-only filter-input" name="cost" value={cost.value} />
-              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
-              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-[var(--color-sim-action)] transition-colors">{cost.label}</span>
-          </label>
-        ))}
-      </div>
-    </div>
-
-    <hr class="border-neutral-800 my-4" />
-
-    <!-- Filtro de Ciudad -->
-    <div class="mb-6">
-      <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{t('sidebar.location')}</h3>
-      <div class="space-y-2">
-        {cities.map(city => (
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <div class="relative flex items-center">
-              <input type="checkbox" class="peer sr-only filter-input" name="city" value={city} />
-              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
-              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-[var(--color-sim-action)] transition-colors">{city}</span>
-          </label>
-        ))}
-      </div>
-    </div>
-
-    <hr class="border-neutral-800 my-4" />
-
     <!-- Filtro de Categorías -->
-    <div>
-      <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{t('sidebar.category')}</h3>
-      <div class="space-y-2">
+    <details class="group mb-4" open>
+      <summary class="flex justify-between items-center font-semibold text-gray-700 dark:text-gray-300 cursor-pointer list-none select-none">
+        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('sidebar.category')}</span>
+        <svg class="w-4 h-4 transition-transform group-open:rotate-180 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+      </summary>
+      <div class="space-y-2 mt-3 pl-1">
         {categories.map(category => (
-          <label class="flex items-center gap-3 cursor-pointer group">
+          <label class="flex items-center gap-3 cursor-pointer group/item">
             <div class="relative flex items-center">
               <input type="checkbox" class="peer sr-only filter-input" name="category" value={category} />
               <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
               <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-[var(--color-sim-action)] transition-colors">{category}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors">{category}</span>
           </label>
         ))}
       </div>
-    </div>
+    </details>
+
+    <hr class="border-neutral-200 dark:border-neutral-800 my-4" />
+
+    <!-- Filtro de Proveedores (Sources) -->
+    <details class="group mb-4">
+      <summary class="flex justify-between items-center font-semibold text-gray-700 dark:text-gray-300 cursor-pointer list-none select-none">
+        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Plataformas</span>
+        <svg class="w-4 h-4 transition-transform group-open:rotate-180 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+      </summary>
+      <div class="space-y-2 mt-3 pl-1 max-h-48 overflow-y-auto custom-scrollbar">
+        {sources.map(source => (
+          <label class="flex items-center gap-3 cursor-pointer group/item">
+            <div class="relative flex items-center">
+              <input type="checkbox" class="peer sr-only filter-input" name="source" value={source} />
+              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
+              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors">{source}</span>
+          </label>
+        ))}
+      </div>
+    </details>
+
+    <hr class="border-neutral-200 dark:border-neutral-800 my-4" />
+
+    <!-- Filtro de Temas (Topics) -->
+    <details class="group mb-4">
+      <summary class="flex justify-between items-center font-semibold text-gray-700 dark:text-gray-300 cursor-pointer list-none select-none">
+        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Temáticas</span>
+        <svg class="w-4 h-4 transition-transform group-open:rotate-180 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+      </summary>
+      <div class="space-y-2 mt-3 pl-1 max-h-48 overflow-y-auto custom-scrollbar">
+        {topics.map(topic => (
+          <label class="flex items-center gap-3 cursor-pointer group/item">
+            <div class="relative flex items-center">
+              <input type="checkbox" class="peer sr-only filter-input" name="topic" value={topic} />
+              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
+              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors">{topic}</span>
+          </label>
+        ))}
+      </div>
+    </details>
+
+    <hr class="border-neutral-200 dark:border-neutral-800 my-4" />
+
+    <!-- Filtro de Fecha -->
+    <details class="group mb-4" open>
+      <summary class="flex justify-between items-center font-semibold text-gray-700 dark:text-gray-300 cursor-pointer list-none select-none">
+        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('sidebar.date')}</span>
+        <svg class="w-4 h-4 transition-transform group-open:rotate-180 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+      </summary>
+      <div class="space-y-2 mt-3 pl-1">
+        {dates.map(date => (
+          <label class="flex items-center gap-3 cursor-pointer group/item">
+            <div class="relative flex items-center">
+              <input type="radio" class="peer sr-only filter-input" name="date" value={date.value} />
+              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded-full bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
+              <div class="absolute w-2 h-2 bg-white rounded-full left-1.5 top-1.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity"></div>
+            </div>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors">{date.label}</span>
+          </label>
+        ))}
+      </div>
+    </details>
+
+    <hr class="border-neutral-200 dark:border-neutral-800 my-4" />
+
+    <!-- Filtro de Modalidad -->
+    <details class="group mb-4" open>
+      <summary class="flex justify-between items-center font-semibold text-gray-700 dark:text-gray-300 cursor-pointer list-none select-none">
+        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('sidebar.modality')}</span>
+        <svg class="w-4 h-4 transition-transform group-open:rotate-180 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+      </summary>
+      <div class="space-y-2 mt-3 pl-1">
+        {modalities.map(mod => (
+          <label class="flex items-center gap-3 cursor-pointer group/item">
+            <div class="relative flex items-center">
+              <input type="checkbox" class="peer sr-only filter-input" name="modality" value={mod.value} />
+              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
+              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors">{mod.label}</span>
+          </label>
+        ))}
+      </div>
+    </details>
+
+    <hr class="border-neutral-200 dark:border-neutral-800 my-4" />
+
+    <!-- Filtro de Costo -->
+    <details class="group mb-4" open>
+      <summary class="flex justify-between items-center font-semibold text-gray-700 dark:text-gray-300 cursor-pointer list-none select-none">
+        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('sidebar.cost')}</span>
+        <svg class="w-4 h-4 transition-transform group-open:rotate-180 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+      </summary>
+      <div class="space-y-2 mt-3 pl-1">
+        {costs.map(cost => (
+          <label class="flex items-center gap-3 cursor-pointer group/item">
+            <div class="relative flex items-center">
+              <input type="checkbox" class="peer sr-only filter-input" name="cost" value={cost.value} />
+              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
+              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors">{cost.label}</span>
+          </label>
+        ))}
+      </div>
+    </details>
+
+    <hr class="border-neutral-200 dark:border-neutral-800 my-4" />
+
+    <!-- Filtro de Ciudad -->
+    <details class="group mb-2">
+      <summary class="flex justify-between items-center font-semibold text-gray-700 dark:text-gray-300 cursor-pointer list-none select-none">
+        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('sidebar.location')}</span>
+        <svg class="w-4 h-4 transition-transform group-open:rotate-180 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+      </summary>
+      <div class="space-y-2 mt-3 pl-1">
+        {cities.map(city => (
+          <label class="flex items-center gap-3 cursor-pointer group/item">
+            <div class="relative flex items-center">
+              <input type="checkbox" class="peer sr-only filter-input" name="city" value={city} />
+              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
+              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors">{city}</span>
+          </label>
+        ))}
+      </div>
+    </details>
+
   </div>
 </aside>
+
+<style>
+  /* Ocultar el marcador nativo del details en navegadores webkit */
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.3);
+    border-radius: 4px;
+  }
+</style>
 
 <script>
   // Filter Logic
@@ -138,6 +227,8 @@ const dates = [
     function applyFilters() {
       const selectedCities = Array.from(document.querySelectorAll('input[name="city"]:checked')).map(el => (el as HTMLInputElement).value);
       const selectedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked')).map(el => (el as HTMLInputElement).value);
+      const selectedSources = Array.from(document.querySelectorAll('input[name="source"]:checked')).map(el => (el as HTMLInputElement).value);
+      const selectedTopics = Array.from(document.querySelectorAll('input[name="topic"]:checked')).map(el => (el as HTMLInputElement).value);
       const selectedModalities = Array.from(document.querySelectorAll('input[name="modality"]:checked')).map(el => (el as HTMLInputElement).value);
       const selectedCosts = Array.from(document.querySelectorAll('input[name="cost"]:checked')).map(el => (el as HTMLInputElement).value);
       
@@ -153,7 +244,7 @@ const dates = [
         else clearSearchBtn.classList.add('hidden');
       }
 
-      const hasFilters = selectedCities.length || selectedCategories.length || selectedModalities.length || selectedCosts.length || selectedDate || searchVal.length > 0;
+      const hasFilters = selectedCities.length || selectedCategories.length || selectedSources.length || selectedTopics.length || selectedModalities.length || selectedCosts.length || selectedDate || searchVal.length > 0;
       if (clearBtn) {
         if (hasFilters) clearBtn.classList.remove('hidden');
         else clearBtn.classList.add('hidden');
@@ -169,6 +260,9 @@ const dates = [
       wrappers.forEach(wrapper => {
         const city = wrapper.dataset.city || '';
         const category = wrapper.dataset.category || '';
+        const source = wrapper.dataset.source || '';
+        const searchableText = (wrapper.dataset.search || '').toLowerCase();
+        
         const modality = wrapper.dataset.modality || '';
         const cost = wrapper.dataset.cost || '';
         const timestamp = parseInt(wrapper.dataset.date || '0', 10);
@@ -176,6 +270,11 @@ const dates = [
         
         let matchCity = selectedCities.length === 0 || selectedCities.includes(city) || (city === 'Virtual' && selectedCities.includes('Virtual'));
         let matchCategory = selectedCategories.length === 0 || selectedCategories.includes(category);
+        
+        // Match Source and Topics by using dataset attributes and generic search fallbacks
+        let matchSource = selectedSources.length === 0 || selectedSources.some(s => source.includes(s) || searchableText.includes(s.toLowerCase()));
+        let matchTopic = selectedTopics.length === 0 || selectedTopics.some(t => searchableText.includes(t.toLowerCase()));
+
         let matchModality = selectedModalities.length === 0 || selectedModalities.includes(modality);
         let matchCost = selectedCosts.length === 0 || selectedCosts.includes(cost);
         
@@ -192,10 +291,9 @@ const dates = [
           matchDate = eventDate >= now && eventDate <= threeMonthsFromNow;
         }
 
-        const searchableText = wrapper.dataset.search || '';
         const matchSearch = searchVal === '' || searchableText.includes(searchVal);
 
-        const isVisible = matchCity && matchCategory && matchModality && matchCost && matchDate && matchSearch;
+        const isVisible = matchCity && matchCategory && matchSource && matchTopic && matchModality && matchCost && matchDate && matchSearch;
         
         if (isVisible) {
           wrapper.style.display = 'block';

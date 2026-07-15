@@ -13,6 +13,7 @@ import type * as addEkos from "../addEkos.js";
 import type * as clear from "../clear.js";
 import type * as crons from "../crons.js";
 import type * as events from "../events.js";
+import type * as providers_CourseraProvider from "../providers/CourseraProvider.js";
 import type * as providers_DevpostProvider from "../providers/DevpostProvider.js";
 import type * as providers_Provider from "../providers/Provider.js";
 
@@ -28,6 +29,7 @@ declare const fullApi: ApiFromModules<{
   clear: typeof clear;
   crons: typeof crons;
   events: typeof events;
+  "providers/CourseraProvider": typeof providers_CourseraProvider;
   "providers/DevpostProvider": typeof providers_DevpostProvider;
   "providers/Provider": typeof providers_Provider;
 }>;

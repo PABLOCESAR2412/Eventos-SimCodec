@@ -99,6 +99,7 @@ const liveEventsCount = events.length; // Cambiado temporalmente al total de eve
             class="event-wrapper opacity-0 translate-y-8"
             data-city={event.location.city}
             data-category={event.category}
+            data-source={event.source}
             data-modality={event.location.isVirtual ? 'virtual' : 'presential'}
             data-cost={event.isFree ? 'free' : 'paid'}
             data-date={event.date.start.getTime()}
