@@ -59,15 +59,28 @@ export const saveEvents = internalMutation({
   handler: async (ctx, args) => {
     let added = 0;
     for (const event of args.events) {
-      // Verificar si ya existe para no duplicar (usando registrationUrl como clave única simple)
-      const existing = await ctx.db
-        .query("events")
-        .filter((q) => q.eq(q.field("registrationUrl"), event.registrationUrl))
-        .first();
+      // Verificar si ya existe para no duplicar (usando externalId si existe, o registrationUrl como fallback)
+      let existing;
+      if (event.externalId) {
+        existing = await ctx.db
+          .query("events")
+          .filter((q) => q.eq(q.field("externalId"), event.externalId))
+          .first();
+      }
+      
+      if (!existing) {
+        existing = await ctx.db
+          .query("events")
+          .filter((q) => q.eq(q.field("registrationUrl"), event.registrationUrl))
+          .first();
+      }
         
       if (!existing) {
         await ctx.db.insert("events", event);
         added++;
+      } else if (event.updatedAt && (!existing.updatedAt || event.updatedAt > existing.updatedAt)) {
+        // Actualizar registro si los datos provistos son más recientes
+        await ctx.db.patch(existing._id, event);
       }
     }
 

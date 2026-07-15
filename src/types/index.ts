@@ -1,10 +1,13 @@
-export type EventSource = 'Meetup' | 'Eventbrite' | 'GitHub' | 'lu.ma' | 'Dev.to' | 'Scraped';
-export type TechCategory = 'Web Development' | 'AI & Data Science' | 'Cybersecurity' | 'Cloud & DevOps' | 'Design & UX' | 'General Tech' | 'Entrepreneurship' | 'Education';
+export type EventSource = string; // Permitir cualquier string dado la gran cantidad de fuentes (Devpost, MLH, Coursera, etc)
+export type TechCategory = 'Eventos' | 'Formación' | 'Competencias' | 'Emprendimiento' | 'Financiamiento' | 'Comunidad' | 'Empleo';
 
 export interface EventLocation {
-  city: 'Quito' | 'Guayaquil' | 'Cuenca' | 'Other' | 'Virtual';
+  city?: string;
+  province?: string;
+  country?: string;
   address?: string;
   isVirtual: boolean;
+  isHybrid?: boolean;
 }
 
 export interface EventDate {
@@ -13,16 +16,24 @@ export interface EventDate {
 }
 
 export interface TechEvent {
-  id: string;
+  id?: string;
+  externalId?: string;
   title: string;
   description: string;
-  url: string;
+  url: string; // url de inscripción oficial
+  officialUrl?: string; // url de la entidad organizadora
   source: EventSource;
-  category: TechCategory;
+  category: TechCategory | string;
+  subcategory?: string;
   location: EventLocation;
   date: EventDate;
+  timeString?: string;
   imageUrl?: string;
-  isLive: boolean; // Computed dynamically
+  isLive: boolean; 
   isFree: boolean;
   price?: string;
+  organizer?: string;
+  status?: string;
+  tags?: string[];
+  updatedAt?: number;
 }

@@ -8,6 +8,7 @@ export default defineSchema({
     dateStart: v.number(), // timestamp
     dateEnd: v.optional(v.number()), // timestamp
     timeString: v.optional(v.string()),
+    externalId: v.optional(v.string()), // ID externo para evitar duplicados de APIs
 
     // Ubicación
     city: v.optional(v.string()),
@@ -49,6 +50,7 @@ export default defineSchema({
     apiUsed: v.optional(v.string()),
     isLinkValid: v.boolean(),
     lastLinkCheck: v.optional(v.number()),
+    updatedAt: v.optional(v.number()),
   })
     .index("by_category", ["category"])
     .index("by_date", ["dateStart"])

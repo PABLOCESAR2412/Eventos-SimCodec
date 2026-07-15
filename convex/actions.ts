@@ -1,5 +1,6 @@
 import { action } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { DevpostProvider } from "./providers/DevpostProvider";
 
 export const syncAllSources = action({
   args: {},
@@ -164,38 +165,14 @@ export const syncAllSources = action({
     // 4. Buscar Eventos en Periódicos de Ecuador
     await scrapeNewspapers();
 
-    // 4. Fetch Devpost Hackathons
+    // 4. Fetch Devpost Hackathons mediante el nuevo Provider
     try {
-      const devpostRes = await fetch('https://devpost.com/api/hackathons?status=open');
-      if (devpostRes.ok) {
-        const data = await devpostRes.json();
-        const hackathons = data.hackathons || [];
-        for (const h of hackathons) {
-          const startDate = new Date(h.submissions_start || h.created_at).getTime();
-          if (startDate < now) continue;
-
-          eventsToSave.push({
-            title: h.title,
-            description: "Únete a este hackathon global y crea soluciones innovadoras.",
-            dateStart: startDate,
-            country: "Global",
-            city: h.displayed_location?.location || "Virtual",
-            isVirtual: h.displayed_location?.location === "Online",
-            isHybrid: false,
-            category: "Entrepreneurship",
-            isFree: true,
-            registrationUrl: h.url,
-            status: "PUBLISHED",
-            language: "en",
-            tags: (h.themes || []).map((t: any) => t.name),
-            source: "Devpost",
-            isLinkValid: true,
-            imageUrl: h.thumbnail_url ? `https:${h.thumbnail_url}` : undefined,
-          });
-        }
-      }
+      const devpost = new DevpostProvider();
+      const devpostRaw = await devpost.obtenerOportunidades();
+      const devpostNormalized = devpost.normalizarDatos(devpostRaw);
+      eventsToSave.push(...devpostNormalized);
     } catch (e) {
-      console.error("Error fetching Devpost", e);
+      console.error("Error al procesar DevpostProvider:", e);
     }
 
     // Función auxiliar para grupos de Meetup (vía RSS)

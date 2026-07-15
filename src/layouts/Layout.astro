@@ -93,9 +93,44 @@ const lang = getLangFromUrl(Astro.url);
       </div>
     </nav>
     
-    <div class="pt-24">
+    <!-- Sub-Nav / Menú Principal de Oportunidades -->
+    <div class="fixed top-[72px] left-0 right-0 z-[90] bg-white/80 dark:bg-[#0A0A0C]/80 backdrop-blur-md border-b border-[var(--border-color)] overflow-hidden transition-colors duration-300">
+      <div class="max-w-[90rem] mx-auto px-6">
+        <ul class="flex items-center gap-6 overflow-x-auto custom-scrollbar py-3 text-sm font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
+          <li><a href="/?q=Eventos" class="hover:text-[var(--color-sim-action)] transition-colors">Eventos</a></li>
+          <li><a href="/?q=Cursos" class="hover:text-[var(--color-sim-action)] transition-colors">Cursos</a></li>
+          <li><a href="/?q=Webinars" class="hover:text-[var(--color-sim-action)] transition-colors">Webinars</a></li>
+          <li><a href="/?q=Hackathons" class="hover:text-[var(--color-sim-action)] transition-colors">Hackathons</a></li>
+          <li><a href="/?q=Concursos" class="hover:text-[var(--color-sim-action)] transition-colors">Concursos</a></li>
+          <li><a href="/?q=Becas" class="hover:text-[var(--color-sim-action)] transition-colors">Becas</a></li>
+          <li><a href="/?q=Convocatorias" class="hover:text-[var(--color-sim-action)] transition-colors">Convocatorias</a></li>
+          <li><a href="/?q=Certificaciones" class="hover:text-[var(--color-sim-action)] transition-colors">Certificaciones</a></li>
+          <li><a href="/?q=Startup" class="hover:text-[var(--color-sim-action)] transition-colors">Startup Programs</a></li>
+          <li><a href="/?q=Ferias" class="hover:text-[var(--color-sim-action)] transition-colors">Ferias</a></li>
+          <li><a href="/?q=Networking" class="hover:text-[var(--color-sim-action)] transition-colors">Networking</a></li>
+          <li><a href="/?q=Mentorías" class="hover:text-[var(--color-sim-action)] transition-colors">Mentorías</a></li>
+          <li><a href="/?q=Comunidades" class="hover:text-[var(--color-sim-action)] transition-colors">Comunidades</a></li>
+          <li><a href="/?q=Investigación" class="hover:text-[var(--color-sim-action)] transition-colors">Investigación</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="pt-[130px]">
       <slot />
     </div>
+
+    <style>
+      .custom-scrollbar::-webkit-scrollbar {
+        height: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.3);
+        border-radius: 4px;
+      }
+    </style>
 
     <script>
       import Lenis from 'lenis';
