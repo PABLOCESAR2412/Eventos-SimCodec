@@ -1,16 +1,30 @@
 import { cronJobs } from "convex/server";
-import { api, internal } from "./_generated/api";
+import { api } from "./_generated/api";
 
 const crons = cronJobs();
 
-// Sincronizar fuentes cada 6 horas (Web Scraping y APIs)
+// 1. Sincronizar fuentes de APIs rápidas y confiables (Cada 6 horas)
 crons.interval(
-  "sync-events-every-6-hours",
-  { hours: 6 }, // Run every 6 hours
-  api.actions.syncAllSources
+  "sync-apis-every-6-hours",
+  { hours: 6 },
+  api.actions.syncApiSources
 );
 
-// Tarea para validación de links (Link Rotting detection) una vez al día
+// 2. Sincronizar RSS Feeds (Cada 12 horas)
+crons.interval(
+  "sync-rss-every-12-hours",
+  { hours: 12 },
+  api.actions.syncRssSources
+);
+
+// 3. Sincronizar Scraping Pesado (Cada 24 horas)
+crons.interval(
+  "sync-scraping-every-24-hours",
+  { hours: 24 },
+  api.actions.syncScrapingSources
+);
+
+// 4. Tarea para validación de links (Link Rotting detection) una vez al día
 crons.daily(
   "validate-broken-links",
   { hourUTC: 8, minuteUTC: 0 },

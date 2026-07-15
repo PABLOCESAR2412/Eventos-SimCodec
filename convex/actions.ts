@@ -1,30 +1,54 @@
 import { action } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { DevpostProvider } from "./providers/DevpostProvider";
+import { CourseraProvider } from "./providers/CourseraProvider";
 
-export const syncAllSources = action({
+const now = Date.now();
+
+// ==========================================
+// 1. APIs (Cada 6 horas)
+// ==========================================
+export const syncApiSources = action({
   args: {},
   handler: async (ctx) => {
     const eventsToSave = [];
-    const now = Date.now();
 
-    // 1. Fetch Dev.to (Artículos y Eventos Tech)
+    // Devpost
+    try {
+      const devpost = new DevpostProvider();
+      const devpostRaw = await devpost.obtenerOportunidades();
+      eventsToSave.push(...devpost.normalizarDatos(devpostRaw));
+    } catch (e) {
+      console.error("Error al procesar DevpostProvider:", e);
+    }
+
+    // Coursera
+    try {
+      const coursera = new CourseraProvider();
+      const courseraRaw = await coursera.obtenerOportunidades();
+      eventsToSave.push(...coursera.normalizarDatos(courseraRaw));
+    } catch (e) {
+      console.error("Error al procesar CourseraProvider:", e);
+    }
+
+    // Dev.to (Inline api, to be moved to Provider)
     try {
       const devToRes = await fetch('https://dev.to/api/articles?tag=events&top=7');
       if (devToRes.ok) {
         const devToData = await devToRes.json();
         for (const item of devToData) {
           const itemDate = new Date(item.created_at).getTime();
-          if (itemDate < now) continue; // Solo eventos futuros o de hoy
+          if (itemDate < now) continue;
           
           eventsToSave.push({
+            externalId: `devto-${item.id}`,
             title: item.title,
             description: item.description || "Dev.to Tech Event",
             dateStart: itemDate,
             country: "Global",
             isVirtual: true,
             isHybrid: false,
-            category: "Web Development",
+            category: "Comunidad",
             isFree: true,
             registrationUrl: item.url,
             status: "PUBLISHED",
@@ -40,8 +64,136 @@ export const syncAllSources = action({
       console.error("Error fetching Dev.to", e);
     }
 
-    // Función auxiliar para raspar Eventbrite (Ecuador y Global)
-    const scrapeEventbrite = async (url, isVirtual, category, country) => {
+    if (eventsToSave.length > 0) {
+      await ctx.runMutation(internal.events.saveEvents, { 
+        events: eventsToSave,
+        details: "APIs Sincronizadas:\n- Devpost (Hackathons)\n- Coursera (Formación)\n- Dev.to"
+      });
+    }
+  }
+});
+
+// ==========================================
+// 2. RSS (Cada 12 horas)
+// ==========================================
+export const syncRssSources = action({
+  args: {},
+  handler: async (ctx) => {
+    const eventsToSave = [];
+
+    const scrapeMeetup = async (groupName: string) => {
+      try {
+        const url = `https://www.meetup.com/${groupName}/events/rss/`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const xml = await res.text();
+          const items = [...xml.matchAll(/<item>.*?<title><!\[CDATA\[(.*?)\]\]><\/title>.*?<link>(.*?)<\/link>.*?<pubDate>(.*?)<\/pubDate>.*?<description><!\[CDATA\[(.*?)\]\]><\/description>.*?<\/item>/gs)];
+          
+          for (const match of items) {
+            const title = match[1];
+            const link = match[2];
+            let pubDate = new Date(match[3]).getTime();
+            const desc = match[4];
+
+            if (pubDate < now) pubDate = now + 86400000;
+            
+            eventsToSave.push({
+              externalId: `meetup-${link}`,
+              title: title,
+              description: desc.substring(0, 200) + '...',
+              dateStart: pubDate,
+              country: "Ecuador",
+              city: desc.includes('Quito') ? 'Quito' : (desc.includes('Guayaquil') ? 'Guayaquil' : 'Varias'),
+              isVirtual: desc.toLowerCase().includes('online') || desc.toLowerCase().includes('virtual'),
+              isHybrid: false,
+              category: "Comunidad",
+              subcategory: "Meetups",
+              isFree: true,
+              registrationUrl: link,
+              status: "PUBLISHED",
+              language: "es",
+              tags: ["Meetup", groupName],
+              source: "Meetup",
+              isLinkValid: true,
+            });
+          }
+        }
+      } catch (e) {
+        console.error(`Error fetching Meetup group ${groupName}`, e);
+      }
+    };
+
+    await scrapeMeetup('dotnet-ecuador');
+    await scrapeMeetup('quito-tech-community');
+    await scrapeMeetup('aws-quito');
+
+    const scrapeNewspapers = async () => {
+      try {
+        const massiveQueries = [
+          "tecnologia evento OR feria OR congreso OR taller location:ecuador",
+          "Startup Grind Ecuador OR GDG Ecuador",
+          "ESPOL tech evento OR EPN congreso OR Yachay Tech evento"
+        ];
+        for (const q of massiveQueries) {
+          const query = encodeURIComponent(q);
+          const newsRes = await fetch(`https://news.google.com/rss/search?q=${query}&hl=es-419&gl=EC&ceid=EC:es-419`);
+          if (newsRes.ok) {
+            const xml = await newsRes.text();
+            const items = [...xml.matchAll(/<item>.*?<title>(.*?)<\/title>.*?<link>(.*?)<\/link>.*?<pubDate>(.*?)<\/pubDate>.*?<source.*?>(.*?)<\/source>.*?<\/item>/gs)];
+            for (const match of items) {
+              const title = match[1].replace(" - GoogleNoticias", "").replace(/&quot;/g, '"');
+              const link = match[2];
+              const pubDate = new Date(match[3]).getTime();
+              const sourceName = match[4];
+
+              if (pubDate > now - (86400000 * 2)) {
+                eventsToSave.push({
+                  externalId: `news-${link}`,
+                  title: title,
+                  description: `Noticia tech cubierta por: ${sourceName}. Visita el enlace.`,
+                  dateStart: now,
+                  country: "Ecuador",
+                  city: "Varias",
+                  isVirtual: false,
+                  isHybrid: true,
+                  category: "Eventos",
+                  isFree: true,
+                  registrationUrl: link,
+                  status: "PUBLISHED",
+                  language: "es",
+                  tags: ["News", sourceName],
+                  source: "Medios Nacionales",
+                  isLinkValid: true,
+                });
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Error fetching Google News", e);
+      }
+    };
+
+    await scrapeNewspapers();
+
+    if (eventsToSave.length > 0) {
+      await ctx.runMutation(internal.events.saveEvents, { 
+        events: eventsToSave,
+        details: "RSS Sincronizados:\n- Meetup Groups\n- Google News Ecuador"
+      });
+    }
+  }
+});
+
+// ==========================================
+// 3. Scraping (Cada 24 horas)
+// ==========================================
+export const syncScrapingSources = action({
+  args: {},
+  handler: async (ctx) => {
+    const eventsToSave = [];
+
+    const scrapeEventbrite = async (url: string, isVirtual: boolean, category: string, country: string) => {
       try {
         const ebRes = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
         if (ebRes.ok) {
@@ -57,7 +209,6 @@ export const syncAllSources = action({
                 if (!item || !item.name) continue;
                 
                 const eventDate = new Date(item.startDate).getTime();
-                // Limitar eventos estrictamente desde hoy hasta el final del año siguiente
                 const endOfNextYear = new Date(new Date().getFullYear() + 1, 11, 31).getTime();
                 if (eventDate < now || eventDate > endOfNextYear) continue; 
                 
@@ -70,6 +221,7 @@ export const syncAllSources = action({
                 }
                 
                 eventsToSave.push({
+                  externalId: `eventbrite-${item.url}`,
                   title: item.name,
                   description: item.description?.substring(0, 200) || "Tech Event",
                   dateStart: eventDate,
@@ -97,131 +249,9 @@ export const syncAllSources = action({
       }
     };
 
-    // 2. Fetch Eventbrite Global Online
-    await scrapeEventbrite('https://www.eventbrite.com/d/online/science-and-tech--events/', true, 'AI & Data Science', 'Global');
-    
-    // 3. Fetch Eventbrite Ecuador
-    await scrapeEventbrite('https://www.eventbrite.com/d/ecuador/science-and-tech--events/', false, 'Entrepreneurship', 'Ecuador');
+    await scrapeEventbrite('https://www.eventbrite.com/d/online/science-and-tech--events/', true, 'Eventos', 'Global');
+    await scrapeEventbrite('https://www.eventbrite.com/d/ecuador/science-and-tech--events/', false, 'Emprendimiento', 'Ecuador');
 
-    // Función auxiliar para raspar Noticias (Periódicos y Medios Globales) vía Google News RSS
-    const scrapeNewspapers = async () => {
-      try {
-        const massiveQueries = [
-          "tecnologia evento OR feria OR congreso OR taller location:ecuador",
-          "AWS summit OR AWS events",
-          "Azure events OR Microsoft Reactor",
-          "Google Cloud Next OR Google Developers Events",
-          "OpenAI event OR OpenAI devday",
-          "Hugging Face meetup",
-          "OWASP hackathon OR Black Hat event",
-          "MLH hackathon OR Hack Club",
-          "Luma AI event OR Pretalx tech",
-          "Startup Grind Ecuador OR GDG Ecuador",
-          "ESPOL tech evento OR EPN congreso OR Yachay Tech evento"
-        ];
-        
-        for (const q of massiveQueries) {
-          const query = encodeURIComponent(q);
-          const newsRes = await fetch(`https://news.google.com/rss/search?q=${query}&hl=es-419&gl=EC&ceid=EC:es-419`);
-          if (newsRes.ok) {
-          const xml = await newsRes.text();
-          // Extracción rápida de títulos y links usando regex (ligero y sin dependencias XML)
-          const items = [...xml.matchAll(/<item>.*?<title>(.*?)<\/title>.*?<link>(.*?)<\/link>.*?<pubDate>(.*?)<\/pubDate>.*?<source.*?>(.*?)<\/source>.*?<\/item>/gs)];
-          
-          for (const match of items) {
-            const title = match[1].replace(" - GoogleNoticias", "").replace(/&quot;/g, '"');
-            const link = match[2];
-            const pubDate = new Date(match[3]).getTime();
-            const sourceName = match[4]; // Ej: "El Comercio", "Primicias", "Forbes Ecuador"
-
-            // Filtrar solo noticias recientes para simular eventos en puerta
-            if (pubDate > now - (86400000 * 2)) {
-              eventsToSave.push({
-                title: title,
-                description: `Noticia sobre evento tech cubierta por el medio: ${sourceName}. Visita el enlace para leer los detalles y fechas exactas.`,
-                dateStart: now, // Fecha de hoy para las noticias urgentes
-                country: "Ecuador",
-                city: "Varias",
-                isVirtual: false,
-                isHybrid: true,
-                category: "Innovation",
-                isFree: true,
-                registrationUrl: link,
-                status: "PUBLISHED",
-                language: "es",
-                tags: ["News", sourceName],
-                source: "Periódicos Nacionales",
-                isLinkValid: true,
-              });
-            }
-          }
-        }
-      }
-      } catch (e) {
-        console.error("Error fetching Google News", e);
-      }
-    };
-
-    // 4. Buscar Eventos en Periódicos de Ecuador
-    await scrapeNewspapers();
-
-    // 4. Fetch Devpost Hackathons mediante el nuevo Provider
-    try {
-      const devpost = new DevpostProvider();
-      const devpostRaw = await devpost.obtenerOportunidades();
-      const devpostNormalized = devpost.normalizarDatos(devpostRaw);
-      eventsToSave.push(...devpostNormalized);
-    } catch (e) {
-      console.error("Error al procesar DevpostProvider:", e);
-    }
-
-    // Función auxiliar para grupos de Meetup (vía RSS)
-    const scrapeMeetup = async (groupName: string) => {
-      try {
-        const url = `https://www.meetup.com/${groupName}/events/rss/`;
-        const res = await fetch(url);
-        if (res.ok) {
-          const xml = await res.text();
-          const items = [...xml.matchAll(/<item>.*?<title><!\[CDATA\[(.*?)\]\]><\/title>.*?<link>(.*?)<\/link>.*?<pubDate>(.*?)<\/pubDate>.*?<description><!\[CDATA\[(.*?)\]\]><\/description>.*?<\/item>/gs)];
-          
-          for (const match of items) {
-            const title = match[1];
-            const link = match[2];
-            let pubDate = new Date(match[3]).getTime();
-            const desc = match[4];
-
-            if (pubDate < now) pubDate = now + 86400000; // Si es feed, asignamos mañana
-            
-            eventsToSave.push({
-              title: title,
-              description: desc.substring(0, 200) + '...',
-              dateStart: pubDate,
-              country: "Ecuador",
-              city: desc.includes('Quito') ? 'Quito' : (desc.includes('Guayaquil') ? 'Guayaquil' : 'Varias'),
-              isVirtual: desc.toLowerCase().includes('online') || desc.toLowerCase().includes('virtual'),
-              isHybrid: false,
-              category: "Web Development",
-              isFree: true,
-              registrationUrl: link,
-              status: "PUBLISHED",
-              language: "es",
-              tags: ["Meetup", groupName],
-              source: "Meetup",
-              isLinkValid: true,
-            });
-          }
-        }
-      } catch (e) {
-        console.error(`Error fetching Meetup group ${groupName}`, e);
-      }
-    };
-
-    // 5. Fetch Meetup Groups en Ecuador
-    await scrapeMeetup('dotnet-ecuador');
-    await scrapeMeetup('quito-tech-community');
-    await scrapeMeetup('aws-quito');
-
-    // Función auxiliar para raspar sitios con WordPress "The Events Calendar" (Universidades, CITEC, etc)
     const scrapeWordPressEvents = async (baseUrl: string, sourceName: string) => {
       try {
         const res = await fetch(`${baseUrl}/wp-json/tribe/events/v1/events`);
@@ -231,12 +261,11 @@ export const syncAllSources = action({
           for (const ev of wpEvents) {
             const eventDate = new Date(ev.start_date || ev.date).getTime();
             const endOfNextYear = new Date(new Date().getFullYear() + 1, 11, 31).getTime();
-            
             if (eventDate < now || eventDate > endOfNextYear) continue; 
-            
             const isFree = ev.cost === "" || ev.cost === "0" || ev.cost?.toLowerCase() === "gratis";
             
             eventsToSave.push({
+              externalId: `wp-${ev.url}`,
               title: ev.title.replace(/&#\d+;/g, ""),
               description: ev.description?.replace(/<[^>]*>?/gm, '').substring(0, 200) + '...',
               dateStart: eventDate,
@@ -244,7 +273,7 @@ export const syncAllSources = action({
               city: ev.venue?.city || "Varias",
               isVirtual: ev.venue?.city ? false : true,
               isHybrid: false,
-              category: "Innovation",
+              category: "Eventos",
               isFree: isFree,
               price: isFree ? undefined : ev.cost,
               registrationUrl: ev.url,
@@ -262,7 +291,6 @@ export const syncAllSources = action({
       }
     };
 
-    // 6. Fetch Cámara de Innovación (CITEC) y Universidades / Comunidades de Ecuador (WP APIs)
     const wpSources = [
       { url: 'https://citec.com.ec', name: 'CITEC Ecuador' },
       { url: 'https://www.epn.edu.ec', name: 'EPN Ecuador' },
@@ -273,59 +301,42 @@ export const syncAllSources = action({
       await scrapeWordPressEvents(source.url, source.name);
     }
 
-    // Función auxiliar para eventosecuador.com
-    const scrapeEventosEcuador = async () => {
-      try {
-        const url = 'https://eventosecuador.com/eventos';
-        const res = await fetch(url);
-        if (res.ok) {
-          // Desactivado temporalmente porque EventosEcuador genera fechas y links erróneos
-          // y carece de API estructurada abierta.
-          console.log("EventosEcuador desactivado por inconsistencias en el HTML");
-        }
-      } catch (e) {
-        console.error("Error fetching EventosEcuador", e);
-      }
-    };
-
-    // 7. Fetch EventosEcuador.com
-    await scrapeEventosEcuador();
-
-    // Run Internal Mutation to save all extracted events
     if (eventsToSave.length > 0) {
-      const details = "Fuentes consultadas:\n- Dev.to\n- Eventbrite (Ecuador & Global)\n- Devpost (Hackathons globales)\n- Meetup (.NET, AWS, Quito Tech)\n- Google News Ecuador (Múltiples consultas masivas)\n- Universidades (EPN, ESPOL, UCE)\n- Cámara de Innovación y Tecnología Ecuatoriana (CITEC)";
       await ctx.runMutation(internal.events.saveEvents, { 
         events: eventsToSave,
-        details: details
+        details: "Scraping Sincronizado:\n- Eventbrite\n- CITEC & Universidades"
       });
     }
   }
 });
 
+// ==========================================
+// 4. Validación de Links (Link Rotting)
+// ==========================================
 export const validateEventLinks = action({
   args: {},
   handler: async (ctx) => {
     const events = await ctx.runQuery(internal.events.getEventsForValidation);
-    
     let invalidCount = 0;
     
-    // Batch process in chunks of 5 to avoid overloading
     for (let i = 0; i < events.length; i += 5) {
       const chunk = events.slice(i, i + 5);
       await Promise.all(chunk.map(async (event) => {
         try {
-          // Verificar dominios oficiales requeridos por las reglas del usuario
-          const url = new URL(event.registrationUrl);
-          const domain = url.hostname;
+          // Intento HEAD primero por rapidez
+          let res = await fetch(event.registrationUrl, { method: 'HEAD', headers: { 'User-Agent': 'Mozilla/5.0' } });
           
-          // HTTP HEAD o GET ligero
-          const res = await fetch(event.registrationUrl, { method: 'HEAD', headers: { 'User-Agent': 'Mozilla/5.0' } });
+          // Si el servidor bloquea HEAD (405 Method Not Allowed), hacemos fallback a GET
+          if (res.status === 405) {
+            res = await fetch(event.registrationUrl, { method: 'GET', headers: { 'User-Agent': 'Mozilla/5.0' } });
+          }
+
           if (res.status === 404 || res.status === 410) {
             await ctx.runMutation(internal.events.invalidateEventLink, { id: event._id });
             invalidCount++;
           }
         } catch (error) {
-          // Si falla repetidamente (DNS down, etc), marcar invlido
+          // Timeouts o caídas completas marcan el enlace como roto
           await ctx.runMutation(internal.events.invalidateEventLink, { id: event._id });
           invalidCount++;
         }
