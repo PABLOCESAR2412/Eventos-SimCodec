@@ -10,22 +10,55 @@ export interface RssFeedConfig {
 }
 
 export class GenericRssProvider implements IOpportunityProvider {
-  name = "RSS Aggregator";
+  name = "RSS & News Aggregator";
   private feeds: RssFeedConfig[] = [
-    // IA
+    // === HACKATHONS ===
+    { url: "https://news.google.com/rss/search?q=Major+League+Hacking+MLH+hackathon&hl=en-US&gl=US&ceid=US:en", sourceName: "MLH", category: "Competencias", subcategory: "Hackathons", country: "Global" },
+
+    // === IA ===
     { url: "https://openai.com/blog/rss.xml", sourceName: "OpenAI", category: "Eventos", subcategory: "IA", country: "Global" },
     { url: "https://huggingface.co/blog/feed.xml", sourceName: "HuggingFace", category: "Eventos", subcategory: "IA", country: "Global" },
-    // Cloud
+    { url: "https://blog.deeplearning.ai/rss", sourceName: "DeepLearning.AI", category: "Formación", subcategory: "IA", country: "Global" },
+    { url: "https://blog.google/technology/ai/rss/", sourceName: "Google AI", category: "Formación", subcategory: "IA", country: "Global" },
+
+    // === CLOUD ===
     { url: "https://aws.amazon.com/about-aws/whats-new/recent/feed/", sourceName: "AWS", category: "Eventos", subcategory: "Cloud", country: "Global" },
     { url: "https://azurecomcdn.azureedge.net/en-us/updates/feed/", sourceName: "Azure", category: "Eventos", subcategory: "Cloud", country: "Global" },
     { url: "https://cloudblog.withgoogle.com/rss/", sourceName: "Google Cloud", category: "Eventos", subcategory: "Cloud", country: "Global" },
-    // Startups
-    { url: "https://www.techstars.com/newsroom/rss", sourceName: "Techstars", category: "Emprendimiento", subcategory: "Startups", country: "Global" },
+    { url: "https://blogs.oracle.com/rss", sourceName: "Oracle", category: "Eventos", subcategory: "Cloud", country: "Global" },
+
+    // === STARTUPS ===
     { url: "https://startupgrind.com/blog/rss", sourceName: "Startup Grind", category: "Emprendimiento", subcategory: "Startups", country: "Global" },
-    // Becas & Académico
+    { url: "https://fi.co/feed", sourceName: "Founder Institute", category: "Emprendimiento", subcategory: "Startups", country: "Global" },
+    { url: "https://www.techstars.com/newsroom/rss", sourceName: "Techstars", category: "Emprendimiento", subcategory: "Startups", country: "Global" },
+    { url: "https://news.google.com/rss/search?q=Google+for+Startups+program&hl=en-US&gl=US&ceid=US:en", sourceName: "Google for Startups", category: "Emprendimiento", subcategory: "Startups", country: "Global" },
+    { url: "https://news.google.com/rss/search?q=Microsoft+for+Startups&hl=en-US&gl=US&ceid=US:en", sourceName: "Microsoft for Startups", category: "Emprendimiento", subcategory: "Startups", country: "Global" },
+    { url: "https://news.google.com/rss/search?q=AWS+Activate+startups&hl=en-US&gl=US&ceid=US:en", sourceName: "AWS Activate", category: "Emprendimiento", subcategory: "Startups", country: "Global" },
+    { url: "https://news.google.com/rss/search?q=NVIDIA+Inception+startups&hl=en-US&gl=US&ceid=US:en", sourceName: "NVIDIA Inception", category: "Emprendimiento", subcategory: "Startups", country: "Global" },
+
+    // === BECAS ===
     { url: "https://www.daad.de/en/rss/", sourceName: "DAAD", category: "Financiamiento", subcategory: "Becas", country: "Global" },
-    // Ecuador (Google News Fallback for GDG, IEEE, etc)
-    { url: "https://news.google.com/rss/search?q=GDG+Ecuador+OR+IEEE+Ecuador+OR+Women+Techmakers+Ecuador&hl=es-419&gl=EC&ceid=EC:es-419", sourceName: "Comunidades Ecuador", category: "Comunidad", subcategory: "Ecuador", country: "Ecuador" }
+    { url: "https://news.google.com/rss/search?q=Fulbright+scholarship+tech&hl=en-US&gl=US&ceid=US:en", sourceName: "Fulbright", category: "Financiamiento", subcategory: "Becas", country: "Global" },
+    { url: "https://news.google.com/rss/search?q=Fundacion+Carolina+becas&hl=es-419&gl=EC&ceid=EC:es-419", sourceName: "Fundación Carolina", category: "Financiamiento", subcategory: "Becas", country: "Global" },
+    { url: "https://news.google.com/rss/search?q=Erasmus+tech+scholarship&hl=en-US&gl=US&ceid=US:en", sourceName: "Erasmus+", category: "Financiamiento", subcategory: "Becas", country: "Global" },
+    { url: "https://news.google.com/rss/search?q=Chevening+scholarship+tech&hl=en-US&gl=US&ceid=US:en", sourceName: "Chevening", category: "Financiamiento", subcategory: "Becas", country: "Global" },
+
+    // === CURSOS (Fallbacks RSS) ===
+    { url: "https://news.google.com/rss/search?q=edX+free+tech+courses&hl=en-US&gl=US&ceid=US:en", sourceName: "edX", category: "Formación", subcategory: "Cursos", country: "Global" },
+    { url: "https://news.google.com/rss/search?q=Kaggle+Learn+challenge&hl=en-US&gl=US&ceid=US:en", sourceName: "Kaggle Learn", category: "Formación", subcategory: "Cursos", country: "Global" },
+    { url: "https://news.google.com/rss/search?q=Cisco+Networking+Academy+free&hl=en-US&gl=US&ceid=US:en", sourceName: "Cisco Networking Academy", category: "Formación", subcategory: "Cursos", country: "Global" },
+    { url: "https://news.google.com/rss/search?q=Microsoft+Learn+challenge&hl=en-US&gl=US&ceid=US:en", sourceName: "Microsoft Learn", category: "Formación", subcategory: "Cursos", country: "Global" },
+    { url: "https://news.google.com/rss/search?q=AWS+Skill+Builder+free&hl=en-US&gl=US&ceid=US:en", sourceName: "AWS Skill Builder", category: "Formación", subcategory: "Cursos", country: "Global" },
+    { url: "https://news.google.com/rss/search?q=Google+Cloud+Skills+Boost+free&hl=en-US&gl=US&ceid=US:en", sourceName: "Google Cloud Skills Boost", category: "Formación", subcategory: "Cursos", country: "Global" },
+
+    // === EVENTOS EXTRA & COMUNIDADES ECUADOR ===
+    { url: "https://news.google.com/rss/search?q=Pretalx+tech+conference&hl=en-US&gl=US&ceid=US:en", sourceName: "Pretalx", category: "Eventos", subcategory: "Eventos", country: "Global" },
+    { url: "https://news.google.com/rss/search?q=Sessionize+tech+conference&hl=en-US&gl=US&ceid=US:en", sourceName: "Sessionize", category: "Eventos", subcategory: "Eventos", country: "Global" },
+    { url: "https://news.google.com/rss/search?q=GDG+Ecuador+evento+OR+Google+Developer+Groups+Ecuador&hl=es-419&gl=EC&ceid=EC:es-419", sourceName: "GDG Ecuador", category: "Comunidad", subcategory: "Ecuador", country: "Ecuador" },
+    { url: "https://news.google.com/rss/search?q=IEEE+Ecuador+congreso&hl=es-419&gl=EC&ceid=EC:es-419", sourceName: "IEEE Ecuador", category: "Comunidad", subcategory: "Ecuador", country: "Ecuador" },
+    { url: "https://news.google.com/rss/search?q=Women+Techmakers+Ecuador&hl=es-419&gl=EC&ceid=EC:es-419", sourceName: "Women Techmakers", category: "Comunidad", subcategory: "Ecuador", country: "Ecuador" },
+    { url: "https://news.google.com/rss/search?q=ESPE+tecnologia+congreso&hl=es-419&gl=EC&ceid=EC:es-419", sourceName: "ESPE", category: "Comunidad", subcategory: "Ecuador", country: "Ecuador" },
+    { url: "https://news.google.com/rss/search?q=Yachay+Tech+evento&hl=es-419&gl=EC&ceid=EC:es-419", sourceName: "Yachay Tech", category: "Comunidad", subcategory: "Ecuador", country: "Ecuador" }
   ];
 
   async obtenerOportunidades(): Promise<RawOpportunity[]> {
@@ -44,7 +77,7 @@ export class GenericRssProvider implements IOpportunityProvider {
             title: match[1],
             link: match[2],
             pubDate: match[3],
-            _feedConfig: feed // metadata injectada para la normalización
+            _feedConfig: feed 
           });
         }
       } catch (e) {
@@ -67,14 +100,13 @@ export class GenericRssProvider implements IOpportunityProvider {
       const config = item._feedConfig as RssFeedConfig;
       let pubDate = new Date(item.pubDate).getTime();
       
-      // Si el feed RSS es antiguo, lo ignoramos. Si es reciente, le damos 15 días de vida útil visual.
-      if (pubDate < now - (86400000 * 7)) continue; // Solo traer la última semana de novedades
+      if (pubDate < now - (86400000 * 7)) continue; 
       
-      if (pubDate < now) pubDate = now; // Para eventos/noticias publicadas en el pasado reciente, las mostramos como activas desde hoy
+      if (pubDate < now) pubDate = now; 
 
       events.push({
         externalId: `rss-${config.sourceName}-${item.link}`,
-        title: item.title.replace(/&#\d+;/g, "").replace(/&quot;/g, '"'),
+        title: item.title.replace(/&#\d+;/g, "").replace(/&quot;/g, '"').replace(" - Google News", "").replace(" - Google Noticias", ""),
         description: `Nueva oportunidad de ${config.sourceName}. Haz clic para leer más en el sitio oficial.`,
         url: item.link,
         source: config.sourceName,
@@ -85,9 +117,9 @@ export class GenericRssProvider implements IOpportunityProvider {
           country: config.country,
           isVirtual: config.country !== "Ecuador",
         },
-        date: { start: new Date(pubDate), end: new Date(pubDate + (86400000 * 15)) }, // Activo 15 días visualmente
+        date: { start: new Date(pubDate), end: new Date(pubDate + (86400000 * 15)) },
         isLive: true,
-        isFree: true, // Mayoría de RSS announcements son gratis de leer/aplicar
+        isFree: true, 
         price: "Consultar web",
         organizer: config.sourceName,
         status: "PUBLISHED",
