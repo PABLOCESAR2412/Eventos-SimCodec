@@ -25,34 +25,34 @@ export class DevpostProvider implements IOpportunityProvider {
     const events: TechEvent[] = [];
     const now = Date.now();
 
-    for (const h of rawData) {
-      const startDate = new Date(h.submissions_start || h.created_at).getTime();
-      const endDate = new Date(h.submissions_end).getTime();
+    for (const hack of rawData) {
+      const startDate = new Date(hack.submissions_start || hack.created_at).getTime();
+      const endDate = new Date(hack.submissions_end).getTime();
+      const themes = hack.themes ? hack.themes.map((t: any) => t.name).join(", ") : "";
       
       if (endDate && endDate < now) continue;
 
       events.push({
-        externalId: `devpost-${h.id || h.title}`,
-        title: h.title,
-        description: "Únete a este hackathon y crea soluciones innovadoras.",
-        url: h.url,
+        externalId: `devpost-${hack.id}`,
+        title: hack.title,
+        description: `Hackathon organizado por ${hack.organization_name}. Premios: ${hack.prize_amount}. Themes: ${themes}.`,
+        registrationUrl: hack.url,
         source: this.name,
         category: "Competencias",
-        subcategory: "Hackathons",
-        location: {
-          city: h.displayed_location?.location || "Virtual",
-          country: "Global", // Asumido por devpost, o extraer si es presencial
-          isVirtual: h.displayed_location?.location === "Online",
-        },
-        date: { start: new Date(startDate), end: endDate ? new Date(endDate) : undefined },
-        timeString: undefined,
-        imageUrl: h.thumbnail_url ? `https:${h.thumbnail_url}` : undefined,
-        isLive: startDate <= now && endDate >= now,
-        isFree: true, // Asumido por devpost
+        city: hack.location || "Virtual",
+        country: "Global",
+        isVirtual: !hack.location || hack.location.toLowerCase().includes('online'),
+        isHybrid: false,
+        dateStart: startDate,
+        dateEnd: endDate,
+        imageUrl: hack.thumbnail_url,
+        isFree: true,
         price: "Gratis",
-        organizer: "Devpost / Comunidad",
+        organizer: hack.organization_name || "Devpost / Comunidad",
         status: "PUBLISHED",
-        tags: (h.themes || []).map((t: any) => t.name),
+        language: "en",
+        tags: hack.themes ? hack.themes.map((t: any) => t.name) : ["Hackathon"],
+        isLinkValid: true,
         updatedAt: now
       });
     }

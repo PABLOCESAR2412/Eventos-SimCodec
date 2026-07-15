@@ -31,29 +31,30 @@ export class CourseraProvider implements IOpportunityProvider {
     // Usaremos la fecha actual como fecha de inicio para que estén activos.
     const endDate = now + (30 * 24 * 60 * 60 * 1000); // Activo por 30 días en plataforma local
 
-    for (const c of rawData) {
+    for (const course of rawData) {
+      const partnerName = "Coursera Partners";
+      const url = `https://www.coursera.org/learn/${course.slug}`;
       events.push({
-        externalId: `coursera-${c.id}`,
-        title: c.name,
-        description: c.description ? c.description.substring(0, 300) + '...' : "Curso en línea de tecnología y ciencias de la computación.",
-        url: `https://www.coursera.org/learn/${c.slug}`,
+        externalId: `coursera-${course.id}`,
+        title: course.name,
+        description: `Un curso gratuito impulsado por ${partnerName}. Nivel: ${course.courseType}. Haz clic para inscribirte.`,
+        registrationUrl: url,
         source: this.name,
         category: "Formación",
-        subcategory: "Cursos",
-        location: {
-          city: "Virtual",
-          country: "Global",
-          isVirtual: true,
-        },
-        date: { start: new Date(now), end: new Date(endDate) },
-        timeString: "On-demand",
-        imageUrl: c.photoUrl,
-        isLive: true, 
-        isFree: true, // Coursera permite auditar gratis
-        price: "Gratis (Auditoría)",
-        organizer: "Coursera Partners",
+        city: "Virtual",
+        country: "Global",
+        isVirtual: true,
+        isHybrid: false,
+        dateStart: now,
+        dateEnd: now + (86400000 * 90),
+        imageUrl: course.photoUrl,
+        isFree: true,
+        price: "Gratis (Opción de certificado de pago)",
+        organizer: partnerName,
         status: "PUBLISHED",
-        tags: ["Course", "Tech", "Computer Science"],
+        language: "en",
+        tags: ["Coursera", "Computer Science", "Online Course"],
+        isLinkValid: true,
         updatedAt: now
       });
     }
