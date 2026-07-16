@@ -148,54 +148,6 @@ export const syncRssSources = action({
     await scrapeMeetup('quito-tech-community');
     await scrapeMeetup('aws-quito');
 
-    const scrapeNewspapers = async () => {
-      try {
-        const massiveQueries = [
-          "tecnologia evento OR feria OR congreso OR taller location:ecuador",
-          "Startup Grind Ecuador OR GDG Ecuador",
-          "ESPOL tech evento OR EPN congreso OR Yachay Tech evento"
-        ];
-        for (const q of massiveQueries) {
-          const query = encodeURIComponent(q);
-          const newsRes = await fetch(`https://news.google.com/rss/search?q=${query}&hl=es-419&gl=EC&ceid=EC:es-419`);
-          if (newsRes.ok) {
-            const xml = await newsRes.text();
-            const items = [...xml.matchAll(/<item>.*?<title>(.*?)<\/title>.*?<link>(.*?)<\/link>.*?<pubDate>(.*?)<\/pubDate>.*?<source.*?>(.*?)<\/source>.*?<\/item>/gs)];
-            for (const match of items) {
-              const title = match[1].replace(" - GoogleNoticias", "").replace(/&quot;/g, '"');
-              const link = match[2];
-              const pubDate = new Date(match[3]).getTime();
-              const sourceName = match[4];
-
-              if (pubDate > now - (86400000 * 2)) {
-                eventsToSave.push({
-                  externalId: `news-${link}`,
-                  title: title,
-                  description: `Noticia tech cubierta por: ${sourceName}. Visita el enlace.`,
-                  dateStart: now,
-                  country: "Ecuador",
-                  city: "Varias",
-                  isVirtual: false,
-                  isHybrid: true,
-                  category: "Eventos",
-                  isFree: true,
-                  registrationUrl: link,
-                  status: "PUBLISHED",
-                  language: "es",
-                  tags: ["News", sourceName],
-                  source: "Medios Nacionales",
-                  isLinkValid: true,
-                });
-              }
-            }
-          }
-        }
-      } catch (e) {
-        console.error("Error fetching Google News", e);
-      }
-    };
-
-    await scrapeNewspapers();
 
     if (eventsToSave.length > 0) {
       await ctx.runMutation(internal.events.saveEvents, { 
