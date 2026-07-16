@@ -10,6 +10,7 @@
 
 import type * as actions from "../actions.js";
 import type * as addEkos from "../addEkos.js";
+import type * as clean from "../clean.js";
 import type * as clear from "../clear.js";
 import type * as crons from "../crons.js";
 import type * as events from "../events.js";
@@ -29,6 +30,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   actions: typeof actions;
   addEkos: typeof addEkos;
+  clean: typeof clean;
   clear: typeof clear;
   crons: typeof crons;
   events: typeof events;

@@ -5,14 +5,21 @@ export default mutation({
   handler: async (ctx) => {
     const events = await ctx.db
       .query("events")
-      .filter((q) => q.eq(q.field("source"), "Medios Nacionales"))
       .collect();
 
     let deleted = 0;
     for (const ev of events) {
-      await ctx.db.delete(ev._id);
-      deleted++;
+      if (
+        ev.externalId.startsWith("rss-") ||
+        ev.externalId.startsWith("news-") ||
+        ev.externalId.startsWith("devto-") ||
+        ev.source === "Medios Nacionales" ||
+        ev.tags?.includes("News")
+      ) {
+        await ctx.db.delete(ev._id);
+        deleted++;
+      }
     }
-    return `Deleted ${deleted} news events.`;
+    return `Deleted ${deleted} news/blog events.`;
   }
 });

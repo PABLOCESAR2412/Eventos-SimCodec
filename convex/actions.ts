@@ -4,7 +4,6 @@ import { DevpostProvider } from "./providers/DevpostProvider";
 import { CourseraProvider } from "./providers/CourseraProvider";
 import { LumaProvider } from "./providers/LumaProvider";
 import { EventbriteProvider } from "./providers/EventbriteProvider";
-import { GenericRssProvider } from "./providers/GenericRssProvider";
 
 const now = Date.now();
 
@@ -43,43 +42,12 @@ export const syncApiSources = action({
       console.error("Error al procesar LumaProvider:", e);
     }
 
-    // Dev.to (Inline api, to be moved to Provider)
-    try {
-      const devToRes = await fetch('https://dev.to/api/articles?tag=events&top=7');
-      if (devToRes.ok) {
-        const devToData = await devToRes.json();
-        for (const item of devToData) {
-          const itemDate = new Date(item.created_at).getTime();
-          if (itemDate < now) continue;
-          
-          eventsToSave.push({
-            externalId: `devto-${item.id}`,
-            title: item.title,
-            description: item.description || "Dev.to Tech Event",
-            dateStart: itemDate,
-            country: "Global",
-            isVirtual: true,
-            isHybrid: false,
-            category: "Comunidad",
-            isFree: true,
-            registrationUrl: item.url,
-            status: "PUBLISHED",
-            language: "en",
-            tags: item.tag_list || [],
-            source: "Dev.to",
-            isLinkValid: true,
-            imageUrl: item.social_image || item.cover_image,
-          });
-        }
-      }
-    } catch (e) {
-      console.error("Error fetching Dev.to", e);
-    }
+
 
     if (eventsToSave.length > 0) {
       await ctx.runMutation(internal.events.saveEvents, { 
         events: eventsToSave,
-        details: "APIs Sincronizadas:\n- Devpost (Hackathons)\n- Coursera (Formación)\n- Dev.to"
+        details: "APIs Sincronizadas:\n- Devpost (Hackathons)\n- Coursera (Formación)\n- Luma"
       });
     }
   }
@@ -92,15 +60,6 @@ export const syncRssSources = action({
   args: {},
   handler: async (ctx) => {
     const eventsToSave = [];
-
-    // Generic RSS Provider (AWS, Azure, OpenAI, Techstars, Becas, etc)
-    try {
-      const genericRss = new GenericRssProvider();
-      const rssRaw = await genericRss.obtenerOportunidades();
-      eventsToSave.push(...genericRss.normalizarDatos(rssRaw));
-    } catch (e) {
-      console.error("Error al procesar GenericRssProvider:", e);
-    }
 
     const scrapeMeetup = async (groupName: string) => {
       try {
