@@ -6,9 +6,9 @@ export class CourseraProvider implements IOpportunityProvider {
 
   async obtenerOportunidades(): Promise<RawOpportunity[]> {
     try {
-      // Endpoint público de catálogo de Coursera. Buscamos cursos de tech/CS.
+      // Endpoint público de catálogo de Coursera.
       // Aumentamos a 30 resultados para mayor variedad en frontend.
-      const url = "https://api.coursera.org/api/courses.v1?q=search&query=computer+science&limit=30&fields=description,photoUrl,partnerIds";
+      const url = "https://api.coursera.org/api/courses.v1?limit=30&fields=description,photoUrl,partnerIds";
       const res = await fetch(url);
       if (!this.validarRespuesta(res)) return [];
       

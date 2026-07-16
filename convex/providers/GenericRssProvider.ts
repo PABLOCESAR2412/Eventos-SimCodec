@@ -45,6 +45,7 @@ export class GenericRssProvider implements IOpportunityProvider {
     { url: "https://news.google.com/rss/search?q=Chevening+scholarship+tech&hl=en-US&gl=US&ceid=US:en", sourceName: "Chevening", category: "Financiamiento", subcategory: "Becas", country: "Global", isSpecificEventFeed: false },
 
     // === CURSOS (Fallbacks RSS) ===
+    { url: "https://news.google.com/rss/search?q=Coursera+free+tech+courses&hl=en-US&gl=US&ceid=US:en", sourceName: "Coursera", category: "Formación", subcategory: "Cursos", country: "Global", isSpecificEventFeed: false },
     { url: "https://news.google.com/rss/search?q=edX+free+tech+courses&hl=en-US&gl=US&ceid=US:en", sourceName: "edX", category: "Formación", subcategory: "Cursos", country: "Global", isSpecificEventFeed: false },
     { url: "https://news.google.com/rss/search?q=Kaggle+Learn+challenge&hl=en-US&gl=US&ceid=US:en", sourceName: "Kaggle Learn", category: "Formación", subcategory: "Cursos", country: "Global", isSpecificEventFeed: false },
     { url: "https://news.google.com/rss/search?q=Cisco+Networking+Academy+free&hl=en-US&gl=US&ceid=US:en", sourceName: "Cisco Networking Academy", category: "Formación", subcategory: "Cursos", country: "Global", isSpecificEventFeed: false },
