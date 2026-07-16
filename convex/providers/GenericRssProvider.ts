@@ -13,6 +13,9 @@ export interface RssFeedConfig {
 export class GenericRssProvider implements IOpportunityProvider {
   name = "Filtered RSS Aggregator";
   private feeds: RssFeedConfig[] = [
+    // === HACKATHONS ===
+    { url: "https://news.google.com/rss/search?q=Major+League+Hacking+MLH+hackathon&hl=en-US&gl=US&ceid=US:en", sourceName: "MLH", category: "Competencias", subcategory: "Hackathons", country: "Global", isSpecificEventFeed: false },
+
     // === IA ===
     { url: "https://openai.com/blog/rss.xml", sourceName: "OpenAI", category: "Eventos", subcategory: "IA", country: "Global", isSpecificEventFeed: false },
     { url: "https://huggingface.co/blog/feed.xml", sourceName: "HuggingFace", category: "Eventos", subcategory: "IA", country: "Global", isSpecificEventFeed: false },
@@ -29,9 +32,34 @@ export class GenericRssProvider implements IOpportunityProvider {
     { url: "https://startupgrind.com/blog/rss", sourceName: "Startup Grind", category: "Emprendimiento", subcategory: "Startups", country: "Global", isSpecificEventFeed: false },
     { url: "https://fi.co/feed", sourceName: "Founder Institute", category: "Emprendimiento", subcategory: "Startups", country: "Global", isSpecificEventFeed: false },
     { url: "https://www.techstars.com/newsroom/rss", sourceName: "Techstars", category: "Emprendimiento", subcategory: "Startups", country: "Global", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=Google+for+Startups+program&hl=en-US&gl=US&ceid=US:en", sourceName: "Google for Startups", category: "Emprendimiento", subcategory: "Startups", country: "Global", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=Microsoft+for+Startups&hl=en-US&gl=US&ceid=US:en", sourceName: "Microsoft for Startups", category: "Emprendimiento", subcategory: "Startups", country: "Global", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=AWS+Activate+startups&hl=en-US&gl=US&ceid=US:en", sourceName: "AWS Activate", category: "Emprendimiento", subcategory: "Startups", country: "Global", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=NVIDIA+Inception+startups&hl=en-US&gl=US&ceid=US:en", sourceName: "NVIDIA Inception", category: "Emprendimiento", subcategory: "Startups", country: "Global", isSpecificEventFeed: false },
 
     // === BECAS ===
-    { url: "https://www.daad.de/en/rss/", sourceName: "DAAD", category: "Financiamiento", subcategory: "Becas", country: "Global", isSpecificEventFeed: false }
+    { url: "https://www.daad.de/en/rss/", sourceName: "DAAD", category: "Financiamiento", subcategory: "Becas", country: "Global", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=Fulbright+scholarship+tech&hl=en-US&gl=US&ceid=US:en", sourceName: "Fulbright", category: "Financiamiento", subcategory: "Becas", country: "Global", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=Fundacion+Carolina+becas&hl=es-419&gl=EC&ceid=EC:es-419", sourceName: "Fundación Carolina", category: "Financiamiento", subcategory: "Becas", country: "Global", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=Erasmus+tech+scholarship&hl=en-US&gl=US&ceid=US:en", sourceName: "Erasmus+", category: "Financiamiento", subcategory: "Becas", country: "Global", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=Chevening+scholarship+tech&hl=en-US&gl=US&ceid=US:en", sourceName: "Chevening", category: "Financiamiento", subcategory: "Becas", country: "Global", isSpecificEventFeed: false },
+
+    // === CURSOS (Fallbacks RSS) ===
+    { url: "https://news.google.com/rss/search?q=edX+free+tech+courses&hl=en-US&gl=US&ceid=US:en", sourceName: "edX", category: "Formación", subcategory: "Cursos", country: "Global", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=Kaggle+Learn+challenge&hl=en-US&gl=US&ceid=US:en", sourceName: "Kaggle Learn", category: "Formación", subcategory: "Cursos", country: "Global", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=Cisco+Networking+Academy+free&hl=en-US&gl=US&ceid=US:en", sourceName: "Cisco Networking Academy", category: "Formación", subcategory: "Cursos", country: "Global", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=Microsoft+Learn+challenge&hl=en-US&gl=US&ceid=US:en", sourceName: "Microsoft Learn", category: "Formación", subcategory: "Cursos", country: "Global", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=AWS+Skill+Builder+free&hl=en-US&gl=US&ceid=US:en", sourceName: "AWS Skill Builder", category: "Formación", subcategory: "Cursos", country: "Global", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=Google+Cloud+Skills+Boost+free&hl=en-US&gl=US&ceid=US:en", sourceName: "Google Cloud Skills Boost", category: "Formación", subcategory: "Cursos", country: "Global", isSpecificEventFeed: false },
+
+    // === EVENTOS EXTRA & COMUNIDADES ECUADOR ===
+    { url: "https://news.google.com/rss/search?q=Pretalx+tech+conference&hl=en-US&gl=US&ceid=US:en", sourceName: "Pretalx", category: "Eventos", subcategory: "Conferencias", country: "Global", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=Sessionize+tech+conference&hl=en-US&gl=US&ceid=US:en", sourceName: "Sessionize", category: "Eventos", subcategory: "Conferencias", country: "Global", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=GDG+Ecuador+evento+OR+Google+Developer+Groups+Ecuador&hl=es-419&gl=EC&ceid=EC:es-419", sourceName: "GDG Ecuador", category: "Comunidad", subcategory: "Ecuador", country: "Ecuador", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=IEEE+Ecuador+congreso&hl=es-419&gl=EC&ceid=EC:es-419", sourceName: "IEEE Ecuador", category: "Comunidad", subcategory: "Ecuador", country: "Ecuador", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=Women+Techmakers+Ecuador&hl=es-419&gl=EC&ceid=EC:es-419", sourceName: "Women Techmakers", category: "Comunidad", subcategory: "Ecuador", country: "Ecuador", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=ESPE+tecnologia+congreso&hl=es-419&gl=EC&ceid=EC:es-419", sourceName: "ESPE", category: "Comunidad", subcategory: "Ecuador", country: "Ecuador", isSpecificEventFeed: false },
+    { url: "https://news.google.com/rss/search?q=Yachay+Tech+evento&hl=es-419&gl=EC&ceid=EC:es-419", sourceName: "Yachay Tech", category: "Comunidad", subcategory: "Ecuador", country: "Ecuador", isSpecificEventFeed: false }
   ];
 
   async obtenerOportunidades(): Promise<RawOpportunity[]> {
