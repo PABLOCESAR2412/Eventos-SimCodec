@@ -4,6 +4,7 @@ import { DevpostProvider } from "./providers/DevpostProvider";
 import { CourseraProvider } from "./providers/CourseraProvider";
 import { LumaProvider } from "./providers/LumaProvider";
 import { EventbriteProvider } from "./providers/EventbriteProvider";
+import { GenericRssProvider } from "./providers/GenericRssProvider";
 
 const now = Date.now();
 
@@ -60,6 +61,15 @@ export const syncRssSources = action({
   args: {},
   handler: async (ctx) => {
     const eventsToSave = [];
+
+    // Generic RSS Provider (AWS, Azure, OpenAI, Techstars, Becas, etc)
+    try {
+      const genericRss = new GenericRssProvider();
+      const rssRaw = await genericRss.obtenerOportunidades();
+      eventsToSave.push(...genericRss.normalizarDatos(rssRaw));
+    } catch (e) {
+      console.error("Error al procesar GenericRssProvider:", e);
+    }
 
     const scrapeMeetup = async (groupName: string) => {
       try {

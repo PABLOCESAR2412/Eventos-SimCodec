@@ -10,9 +10,9 @@ export default mutation({
     let deleted = 0;
     for (const ev of events) {
       if (
-        ev.externalId.startsWith("rss-") ||
-        ev.externalId.startsWith("news-") ||
-        ev.externalId.startsWith("devto-") ||
+        (ev.externalId && ev.externalId.startsWith("rss-")) ||
+        (ev.externalId && ev.externalId.startsWith("news-")) ||
+        (ev.externalId && ev.externalId.startsWith("devto-")) ||
         ev.source === "Medios Nacionales" ||
         ev.tags?.includes("News")
       ) {
