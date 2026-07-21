@@ -32,7 +32,7 @@ const t = useTranslations(lang);
   ></button>
 
   <!-- Image Section -->
-  <div class="relative h-48 overflow-hidden bg-gray-100 dark:bg-gray-800">
+  <div class="relative h-48 overflow-hidden bg-gray-100 dark:bg-gray-800 transition-colors duration-300">
     {event.imageUrl ? (
       <img 
         src={event.imageUrl} 
@@ -40,10 +40,13 @@ const t = useTranslations(lang);
         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         loading="lazy"
         decoding="async"
+        onerror="this.onerror=null; this.outerHTML='<div class=\\'w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 transition-colors duration-300\\'><img src=\\'/loading_logo_dark.png\\' class=\\'w-24 h-auto opacity-20 block dark:hidden mb-2\\' alt=\\'SimCodec Logo\\' /><img src=\\'/loading_logo.png\\' class=\\'w-24 h-auto opacity-40 hidden dark:block mb-2\\' alt=\\'SimCodec Logo\\' /><span class=\\'text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest\\'>Sin Imagen Oficial</span></div>';"
       />
     ) : (
-      <div class="w-full h-full flex items-center justify-center text-gray-400">
-        <svg class="w-12 h-12 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+      <div class="w-full h-full flex flex-col items-center justify-center transition-colors duration-300">
+        <img src="/loading_logo_dark.png" class="w-24 h-auto opacity-20 block dark:hidden mb-2" alt="SimCodec Logo" />
+        <img src="/loading_logo.png" class="w-24 h-auto opacity-40 hidden dark:block mb-2" alt="SimCodec Logo" />
+        <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Sin Imagen Oficial</span>
       </div>
     )}
     
@@ -56,8 +59,8 @@ const t = useTranslations(lang);
             EN VIVO
           </span>
         ) : (
-          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/90 dark:bg-black/80 backdrop-blur-md border border-gray-300 dark:border-[var(--color-sim-brand)] text-gray-800 dark:text-white text-[10px] font-bold tracking-wider uppercase shadow-md line-clamp-1 max-w-[200px] sm:max-w-none text-left">
-            <svg class="w-3 h-3 text-[var(--color-sim-brand)] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/90 dark:bg-black/80 backdrop-blur-md border border-gray-300 dark:border-[var(--color-sim-brand)] text-gray-800 dark:text-white text-[10px] font-bold tracking-wider uppercase shadow-md line-clamp-1 max-w-[200px] sm:max-w-none text-left transition-colors duration-300">
+            <svg class="w-3 h-3 text-[var(--color-sim-brand)] shrink-0 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
             <span class="truncate">{!isNaN(event.date.start.getTime()) ? event.date.start.toLocaleDateString('es-EC', { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' }) : 'TBD'}</span>
           </span>
         )}
@@ -66,11 +69,11 @@ const t = useTranslations(lang);
       <!-- Derecha: Etiqueta de Costo (Gratis / De Pago) -->
       <div class="flex flex-col gap-2 items-end shrink-0 pointer-events-auto">
         {event.isFree ? (
-          <span class="inline-flex px-2 py-1 rounded border border-green-500 bg-white/90 dark:bg-black/80 backdrop-blur-md text-green-700 dark:text-green-400 text-[10px] font-bold uppercase tracking-wider shadow-md">
+          <span class="inline-flex px-2 py-1 rounded border border-green-500 bg-white/90 dark:bg-black/80 backdrop-blur-md text-green-700 dark:text-green-400 text-[10px] font-bold uppercase tracking-wider shadow-md transition-colors duration-300">
             GRATIS
           </span>
         ) : (
-          <span class="inline-flex px-2 py-1 rounded border border-orange-500 bg-white/90 dark:bg-black/80 backdrop-blur-md text-[var(--color-sim-orange)] text-[10px] font-bold uppercase tracking-wider font-mono shadow-md truncate max-w-[130px]" title={event.price || 'DE PAGO'}>
+          <span class="inline-flex px-2 py-1 rounded border border-orange-500 bg-white/90 dark:bg-black/80 backdrop-blur-md text-[var(--color-sim-orange)] text-[10px] font-bold uppercase tracking-wider font-mono shadow-md truncate max-w-[130px] transition-colors duration-300" title={event.price || 'DE PAGO'}>
             {event.price || 'DE PAGO'}
           </span>
         )}
@@ -79,26 +82,26 @@ const t = useTranslations(lang);
   </div>
 
   <!-- Content Section -->
-  <div class="flex flex-col flex-grow p-5">
+  <div class="flex flex-col flex-grow p-5 transition-colors duration-300">
     
-    <div class="flex items-center gap-2 mb-3 text-xs font-mono text-[var(--color-sim-orange)] font-semibold uppercase tracking-wider">
+    <div class="flex items-center gap-2 mb-3 text-xs font-mono text-[var(--color-sim-orange)] font-semibold uppercase tracking-wider transition-colors duration-300">
       <span>{event.category}</span>
-      <span class="text-gray-400 dark:text-gray-600 font-bold">•</span>
-      <span class="text-gray-500 dark:text-gray-400 font-sans font-medium">{event.source}</span>
+      <span class="text-gray-400 dark:text-gray-600 font-bold transition-colors duration-300">•</span>
+      <span class="text-gray-500 dark:text-gray-400 font-sans font-medium transition-colors duration-300">{event.source}</span>
     </div>
 
-    <h3 class="text-lg font-bold text-[var(--text-color)] mb-2 line-clamp-2 leading-snug">
+    <h3 class="text-lg font-bold text-[var(--text-color)] mb-2 line-clamp-2 leading-snug transition-colors duration-300">
       {event.title}
     </h3>
     
-    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2 leading-relaxed">
+    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2 leading-relaxed transition-colors duration-300">
       {event.description || 'Visite la página oficial del organizador para más detalles.'}
     </p>
 
     <!-- Meta Info Footer -->
-    <div class="mt-auto pt-4 border-t border-[var(--border-color)] flex items-center justify-between">
-      <div class="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
-        <svg class="w-4 h-4 text-[var(--color-sim-primary)] dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+    <div class="mt-auto pt-4 border-t border-[var(--border-color)] flex items-center justify-between transition-colors duration-300">
+      <div class="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 transition-colors duration-300">
+        <svg class="w-4 h-4 text-[var(--color-sim-primary)] dark:text-gray-400 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
         {event.location.isVirtual ? 'Virtual / Online' : event.location.city}
       </div>
       
