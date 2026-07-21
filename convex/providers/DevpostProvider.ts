@@ -26,8 +26,9 @@ export class DevpostProvider implements IOpportunityProvider {
     const now = Date.now();
 
     for (const hack of rawData) {
-      const startDate = new Date(hack.submissions_start || hack.created_at).getTime();
-      const endDate = new Date(hack.submissions_end).getTime();
+      const startDate = new Date(hack.submissions_start || hack.created_at).getTime() || now;
+      let endDateRaw = new Date(hack.submissions_end).getTime();
+      const endDate = isNaN(endDateRaw) ? undefined : endDateRaw;
       const themes = hack.themes ? hack.themes.map((t: any) => t.name).join(", ") : "";
       
       if (endDate && endDate < now) continue;
@@ -39,6 +40,7 @@ export class DevpostProvider implements IOpportunityProvider {
         registrationUrl: hack.url,
         source: this.name,
         category: "Competencias",
+        subcategory: "Hackathons",
         city: hack.location || "Virtual",
         country: "Global",
         isVirtual: !hack.location || hack.location.toLowerCase().includes('online'),

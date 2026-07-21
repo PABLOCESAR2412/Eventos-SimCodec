@@ -14,6 +14,7 @@ import type * as clean from "../clean.js";
 import type * as clear from "../clear.js";
 import type * as crons from "../crons.js";
 import type * as events from "../events.js";
+import type * as fixnan from "../fixnan.js";
 import type * as providers_CourseraProvider from "../providers/CourseraProvider.js";
 import type * as providers_DevpostProvider from "../providers/DevpostProvider.js";
 import type * as providers_EventbriteProvider from "../providers/EventbriteProvider.js";
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   clear: typeof clear;
   crons: typeof crons;
   events: typeof events;
+  fixnan: typeof fixnan;
   "providers/CourseraProvider": typeof providers_CourseraProvider;
   "providers/DevpostProvider": typeof providers_DevpostProvider;
   "providers/EventbriteProvider": typeof providers_EventbriteProvider;
