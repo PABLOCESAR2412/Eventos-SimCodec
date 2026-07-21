@@ -17,7 +17,7 @@ const lang = getLangFromUrl(Astro.url);
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="generator" content={Astro.generator} />
     
     <!-- Preload Critical Assets -->
@@ -75,7 +75,30 @@ const lang = getLangFromUrl(Astro.url);
   </head>
   <body class="bg-[var(--bg-color)] text-[var(--text-color)] font-sans antialiased selection:bg-[var(--color-sim-action)] selection:text-white transition-colors duration-300">
     
-    <!-- Top Nav with Logo -->
+    <!-- Pantalla de Carga Inicial -->
+    <div id="initial-loader" class="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-[var(--bg-color)] transition-all duration-700">
+      <div class="relative w-56 flex flex-col items-center">
+        <!-- Logo con animación de respiración -->
+        <img src="/loading_logo.png" alt="Cargando SimCodec..." class="w-full h-auto animate-pulse" />
+        <!-- Barra de progreso indeterminada -->
+        <div class="mt-8 w-32 h-1 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+          <div class="h-full bg-[var(--color-sim-brand)] rounded-full loader-bar"></div>
+        </div>
+      </div>
+    </div>
+    <style>
+      .loader-bar {
+        animation: loadingBar 1.5s ease-in-out infinite;
+        transform-origin: left;
+      }
+      @keyframes loadingBar {
+        0% { transform: translateX(-100%); width: 100%; }
+        50% { transform: translateX(0); width: 50%; }
+        100% { transform: translateX(200%); width: 100%; }
+      }
+    </style>
+    
+    <!-- Top Nav con Logo -->
     <nav class="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 py-4 bg-white/90 dark:bg-[#0A0A0C]/90 backdrop-blur-md border-b border-[var(--border-color)] transition-colors duration-300">
       <div class="flex items-center gap-3">
         <!-- SimCodec Logo -->
@@ -110,6 +133,19 @@ const lang = getLangFromUrl(Astro.url);
       lenis.on('scroll', ScrollTrigger.update);
       gsap.ticker.add((time) => lenis.raf(time * 1000));
       gsap.ticker.lagSmoothing(0);
+
+      // Loading Screen Logic
+      window.addEventListener('load', () => {
+        const loader = document.getElementById('initial-loader');
+        if (loader) {
+          // Pequeño delay extra para asegurar que las fuentes y layout estén parseados
+          setTimeout(() => {
+            loader.style.opacity = '0';
+            loader.style.visibility = 'hidden';
+            setTimeout(() => loader.remove(), 700); // Remover del DOM luego de la transición
+          }, 300);
+        }
+      });
 
       // Theme Toggle Logic
       const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');

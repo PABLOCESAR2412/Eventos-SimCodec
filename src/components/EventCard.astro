@@ -25,6 +25,8 @@ const t = useTranslations(lang);
     data-url={event.registrationUrl || event.url}
     data-image={event.imageUrl || ''}
     data-city={event.location.city}
+    data-category={event.category}
+    data-subcategory={event.subcategory || ''}
     data-price={event.isFree ? 'GRATIS' : (event.price || 'DE PAGO')}
     data-date={!isNaN(event.date.start.getTime()) ? event.date.start.toLocaleDateString('es-EC', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' }) : 'Fecha por confirmar'}
   ></button>

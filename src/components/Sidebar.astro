@@ -230,7 +230,19 @@ const dates = [
     const inputs = document.querySelectorAll('.filter-input') as NodeListOf<HTMLInputElement>;
     const clearBtn = document.getElementById('clear-filters');
     
-    function applyFilters() {
+    // Pagination State
+    let currentPage = 1;
+    let pageSizeSelect = document.getElementById('page-size') as HTMLSelectElement;
+    let itemsPerPage = parseInt(pageSizeSelect?.value || '24', 10);
+    
+    const prevBtn = document.getElementById('prev-page') as HTMLButtonElement;
+    const nextBtn = document.getElementById('next-page') as HTMLButtonElement;
+    const pageNumbersContainer = document.getElementById('page-numbers');
+    const paginationContainer = document.getElementById('pagination-container');
+    
+    function applyFilters(resetPage = false) {
+      if (resetPage) currentPage = 1;
+      
       const selectedCities = Array.from(document.querySelectorAll('input[name="city"]:checked')).map(el => (el as HTMLInputElement).value);
       const selectedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked')).map(el => (el as HTMLInputElement).value);
       const selectedSources = Array.from(document.querySelectorAll('input[name="source"]:checked')).map(el => (el as HTMLInputElement).value);
@@ -257,7 +269,7 @@ const dates = [
       }
 
       const wrappers = document.querySelectorAll('.event-wrapper') as NodeListOf<HTMLElement>;
-      let visibleCount = 0;
+      let filteredElements: HTMLElement[] = [];
 
       const now = new Date();
       const currentMonth = now.getMonth();
@@ -277,7 +289,6 @@ const dates = [
         let matchCity = selectedCities.length === 0 || selectedCities.includes(city) || (city === 'Virtual' && selectedCities.includes('Virtual'));
         let matchCategory = selectedCategories.length === 0 || selectedCategories.includes(category);
         
-        // Match Source and Topics by using dataset attributes and generic search fallbacks
         let matchSource = selectedSources.length === 0 || selectedSources.some(s => source.includes(s) || searchableText.includes(s.toLowerCase()));
         let matchTopic = selectedTopics.length === 0 || selectedTopics.some(t => searchableText.includes(t.toLowerCase()));
 
@@ -299,37 +310,123 @@ const dates = [
 
         const matchSearch = searchVal === '' || searchableText.includes(searchVal);
 
-        const isVisible = matchCity && matchCategory && matchSource && matchTopic && matchModality && matchCost && matchDate && matchSearch;
-        
-        if (isVisible) {
-          wrapper.style.display = 'block';
-          wrapper.animate([
-            { opacity: 0, transform: 'scale(0.95)' },
-            { opacity: 1, transform: 'scale(1)' }
-          ], { duration: 300, easing: 'ease-out' });
-          visibleCount++;
+        if (matchCity && matchCategory && matchSource && matchTopic && matchModality && matchCost && matchDate && matchSearch) {
+          filteredElements.push(wrapper);
         } else {
           wrapper.style.display = 'none';
+          wrapper.style.opacity = '0';
+          wrapper.style.transform = 'scale(0.95)';
+        }
+      });
+      
+      const totalItems = filteredElements.length;
+      const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+      
+      // Asegurar que currentPage no exceda el máximo
+      if (currentPage > totalPages) currentPage = totalPages;
+      
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+      
+      // Mostrar solo los elementos de la página actual
+      filteredElements.forEach((wrapper, index) => {
+        if (index >= startIndex && index < endIndex) {
+          if (wrapper.style.display === 'none') {
+             wrapper.style.display = 'block';
+             requestAnimationFrame(() => {
+               wrapper.style.opacity = '1';
+               wrapper.style.transform = 'scale(1)';
+             });
+          }
+        } else {
+          wrapper.style.display = 'none';
+          wrapper.style.opacity = '0';
+          wrapper.style.transform = 'scale(0.95)';
         }
       });
 
-      document.dispatchEvent(new CustomEvent('filters:changed', { detail: { count: visibleCount } }));
+      // Update Pagination UI
+      if (paginationContainer) {
+        paginationContainer.style.display = totalItems > 0 ? 'flex' : 'none';
+      }
+      
+      if (prevBtn && nextBtn && pageNumbersContainer) {
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages;
+        
+        pageNumbersContainer.innerHTML = '';
+        
+        // Mostrar hasta 5 números de página para no romper el layout
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+        
+        if (endPage - startPage < 4) {
+          startPage = Math.max(1, endPage - 4);
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+          const btn = document.createElement('button');
+          btn.textContent = i.toString();
+          btn.className = \`px-3 py-1 rounded-md text-sm font-medium transition-colors \${i === currentPage ? 'bg-[var(--color-sim-action)] text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}\`;
+          btn.onclick = () => {
+            currentPage = i;
+            applyFilters(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          };
+          pageNumbersContainer.appendChild(btn);
+        }
+      }
+
+      document.dispatchEvent(new CustomEvent('filters:changed', { detail: { count: totalItems } }));
+    }
+
+    let debounceTimer: ReturnType<typeof setTimeout>;
+    function debouncedApplyFilters(resetPage = false) {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        requestAnimationFrame(() => applyFilters(resetPage));
+      }, 150);
     }
 
     inputs.forEach(input => {
-      input.addEventListener('change', applyFilters);
+      input.addEventListener('change', () => debouncedApplyFilters(true));
     });
 
     const globalSearch = document.getElementById('global-search');
     if (globalSearch) {
-      globalSearch.addEventListener('input', applyFilters);
+      globalSearch.addEventListener('input', () => debouncedApplyFilters(true));
+    }
+    
+    if (pageSizeSelect) {
+      pageSizeSelect.addEventListener('change', (e) => {
+        itemsPerPage = parseInt((e.target as HTMLSelectElement).value, 10);
+        debouncedApplyFilters(true);
+      });
+    }
+    
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          applyFilters(false);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      });
+    }
+    
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        currentPage++;
+        applyFilters(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
     }
     
     const clearSearchBtn = document.getElementById('clear-search');
     if (clearSearchBtn && globalSearch) {
       clearSearchBtn.addEventListener('click', () => {
         (globalSearch as HTMLInputElement).value = '';
-        applyFilters();
+        debouncedApplyFilters(true);
       });
     }
 
@@ -339,8 +436,11 @@ const dates = [
           if (input.type === 'radio' || input.type === 'checkbox') input.checked = false;
         });
         if (globalSearch) (globalSearch as HTMLInputElement).value = '';
-        applyFilters();
+        debouncedApplyFilters(true);
       });
     }
+    
+    // Call on load to setup initial pagination
+    applyFilters(true);
   });
 </script>

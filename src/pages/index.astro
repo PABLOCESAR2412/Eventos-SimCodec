@@ -113,6 +113,33 @@ const liveEventsCount = events.length; // Cambiado temporalmente al total de eve
           </div>
         ))}
       </div>
+
+      <!-- Pagination Controls -->
+      <div id="pagination-container" class="flex flex-col md:flex-row items-center justify-between gap-4 mt-12 bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-800 rounded-2xl p-4 shadow-sm transition-colors duration-300">
+        <div class="flex items-center gap-3">
+          <label for="page-size" class="text-sm font-semibold text-gray-600 dark:text-gray-400">Mostrar:</label>
+          <select id="page-size" class="bg-gray-100 dark:bg-gray-800 border-none rounded-lg text-sm font-bold text-[var(--text-color)] py-2 px-3 cursor-pointer focus:ring-2 focus:ring-[var(--color-sim-action)] transition-colors">
+            <option value="12">12</option>
+            <option value="24" selected>24</option>
+            <option value="48">48</option>
+            <option value="1000">Todos</option>
+          </select>
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <button id="prev-page" class="p-2 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" aria-label="Página anterior">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+          </button>
+          
+          <div id="page-numbers" class="flex items-center gap-1 mx-2">
+            <!-- Números de página inyectados por JS -->
+          </div>
+          
+          <button id="next-page" class="p-2 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" aria-label="Siguiente página">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Modal Component -->
@@ -137,19 +164,16 @@ const liveEventsCount = events.length; // Cambiado temporalmente al total de eve
           <div class="bg-gray-100 dark:bg-gray-800/50 rounded-lg p-5 mb-8 border border-gray-300 dark:border-[var(--border-color)] transition-colors duration-300">
             <h3 class="text-sm font-bold text-[var(--text-color)] uppercase tracking-wider mb-3 flex items-center gap-2 transition-colors duration-300">
               <svg class="w-4 h-4 text-[var(--color-sim-brand)] transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              Pasos para Inscribirse
+              <span id="modal-instructions-title">Pasos para Participar</span>
             </h3>
-            <ol class="list-decimal list-inside space-y-2 text-sm text-gray-700 dark:text-gray-300 transition-colors duration-300">
-              <li>Haz clic en el botón <strong class="text-[var(--color-sim-action)]">Completar Registro</strong> de abajo.</li>
-              <li>Serás redirigido a la plataforma oficial del organizador.</li>
-              <li>Busca el botón "Join", "Registrarse" o "Buy Tickets" en su web.</li>
-              <li>Llena el formulario con tus datos corporativos si es requerido.</li>
+            <ol id="modal-instructions-list" class="list-decimal list-inside space-y-2 text-sm text-gray-700 dark:text-gray-300 transition-colors duration-300">
+              <!-- Dynamically injected via JS -->
             </ol>
           </div>
           
           <div class="flex justify-end pt-4 border-t border-[var(--border-color)]">
             <a id="modal-link" href="#" target="_blank" rel="noopener noreferrer" class="bg-[var(--color-sim-action)] hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg shadow-[var(--color-sim-action)]/20 transition-all hover:scale-105 flex items-center gap-2">
-              Completar Registro
+              <span id="modal-btn-text">Ir al Sitio Web</span>
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
             </a>
           </div>
@@ -194,12 +218,55 @@ const liveEventsCount = events.length; // Cambiado temporalmente al total de eve
       const openModal = (btn: HTMLElement) => {
         if (!modal || !modalContent) return;
         
-        const { title, desc, url, image, city, price, date } = btn.dataset;
+        const { title, desc, url, image, city, price, date, category, subcategory } = btn.dataset;
         
         document.getElementById('modal-title')!.textContent = title || '';
         document.getElementById('modal-desc')!.textContent = desc || '';
         document.getElementById('modal-city')!.textContent = city || '';
         document.getElementById('modal-date')!.textContent = date || '';
+        
+        // Dynamically update instructions based on category
+        const instTitle = document.getElementById('modal-instructions-title')!;
+        const instList = document.getElementById('modal-instructions-list')!;
+        const btnText = document.getElementById('modal-btn-text')!;
+        
+        if (category === 'Formación') {
+          instTitle.textContent = 'Pasos para el Curso / Capacitación';
+          instList.innerHTML = `
+            <li>Haz clic en <strong class="text-[var(--color-sim-action)]">Ir a la Plataforma</strong>.</li>
+            <li>Serás redirigido a la página oficial del curso (ej. Coursera, edX, etc).</li>
+            <li>Busca el botón "Enroll for Free" o "Inscribirse".</li>
+            <li>Inicia sesión con tu cuenta personal o corporativa para comenzar.</li>
+          `;
+          btnText.textContent = 'Ir a la Plataforma';
+        } else if (category === 'Emprendimiento' || category === 'Financiamiento') {
+          instTitle.textContent = 'Pasos para Aplicar a la Convocatoria';
+          instList.innerHTML = `
+            <li>Haz clic en <strong class="text-[var(--color-sim-action)]">Revisar Convocatoria</strong>.</li>
+            <li>Lee detenidamente las bases, requisitos y fechas límite en el sitio oficial.</li>
+            <li>Prepara la documentación o el Pitch Deck solicitado por la organización.</li>
+            <li>Haz clic en "Apply Now" o "Postular" y completa el formulario oficial.</li>
+          `;
+          btnText.textContent = 'Revisar Convocatoria';
+        } else if (category === 'Competencias') {
+          instTitle.textContent = 'Pasos para el Hackathon / Competencia';
+          instList.innerHTML = `
+            <li>Haz clic en <strong class="text-[var(--color-sim-action)]">Ver Reto Oficial</strong>.</li>
+            <li>Serás redirigido a la plataforma (ej. Devpost, Kaggle).</li>
+            <li>Lee las reglas de la competencia y los premios.</li>
+            <li>Haz clic en "Join Hackathon" o "Participar" para inscribirte y buscar equipo.</li>
+          `;
+          btnText.textContent = 'Ver Reto Oficial';
+        } else {
+          instTitle.textContent = 'Pasos para el Evento';
+          instList.innerHTML = `
+            <li>Haz clic en <strong class="text-[var(--color-sim-action)]">Obtener Tickets / RSVP</strong>.</li>
+            <li>Serás redirigido a la web del organizador.</li>
+            <li>Busca el botón "Registrarse", "Join" o "Buy Tickets".</li>
+            <li>Si es presencial, revisa bien la dirección; si es virtual, guarda el link del streaming.</li>
+          `;
+          btnText.textContent = 'Obtener Tickets / RSVP';
+        }
         
         const priceEl = document.getElementById('modal-price')!;
         priceEl.textContent = price || '';
@@ -244,4 +311,11 @@ const liveEventsCount = events.length; // Cambiado temporalmente al total de eve
       if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
     });
   </script>
+
+  <style>
+    .event-wrapper {
+      transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+      will-change: opacity, transform;
+    }
+  </style>
 </Layout>

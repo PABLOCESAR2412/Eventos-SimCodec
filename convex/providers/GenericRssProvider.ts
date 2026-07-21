@@ -161,17 +161,29 @@ export class GenericRssProvider implements IOpportunityProvider {
     const events: TechEvent[] = [];
     const now = Date.now();
 
+    const imagePlaceholders: Record<string, string> = {
+      "Eventos": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80", // Tech conference
+      "Formación": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80", // Learning
+      "Competencias": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&q=80", // Hackathon
+      "Emprendimiento": "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&q=80", // Startup
+      "Financiamiento": "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800&q=80", // Grants/Money
+      "Comunidad": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80", // Community
+      "Empleo": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&q=80", // Job fair
+    };
+    const defaultImage = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80";
+
     for (const item of rawData) {
       const config = item._feedConfig as RssFeedConfig;
       let pubDate = new Date(item.pubDate).getTime();
       
-      if (pubDate < now - (86400000 * 30)) continue; // Ignorar muy antiguos
-      if (pubDate < now) pubDate = now; // Si ya pasó, poner como ahora para que sea activo
+      // Al ser RSS de noticias, pubDate es la fecha de la noticia, NO del evento.
+      // Para evitar que salgan vencidos, los empujamos al futuro como estimación (14 días).
+      const estimatedStartDate = now + (86400000 * 14);
 
       events.push({
         externalId: `rss-filtered-${config.sourceName}-${item.link}`,
         title: item.title.replace(/&#\d+;/g, "").replace(/&quot;/g, '"'),
-        description: `Nueva oportunidad de ${config.sourceName}. Haz clic para inscribirte en el sitio oficial.`,
+        description: `Noticia/Convocatoria detectada vía ${config.sourceName}. IMPORTANTE: Las fechas mostradas son referenciales. Haz clic en "Completar Registro" para ver el calendario exacto en el sitio web oficial.`,
         registrationUrl: item.link,
         source: config.sourceName,
         category: config.category,
@@ -180,8 +192,8 @@ export class GenericRssProvider implements IOpportunityProvider {
         country: config.country,
         isVirtual: config.country !== "Ecuador",
         isHybrid: false,
-        dateStart: pubDate,
-        dateEnd: pubDate + (86400000 * 15), // Asume vigencia de 15 días si no hay fecha fin
+        dateStart: estimatedStartDate,
+        dateEnd: estimatedStartDate + (86400000 * 30), // Vigencia extendida
         isFree: true,
         price: "Consultar web",
         organizer: config.sourceName,
@@ -189,7 +201,8 @@ export class GenericRssProvider implements IOpportunityProvider {
         language: config.country === "Ecuador" ? "es" : "en",
         tags: [config.subcategory || config.category],
         isLinkValid: true,
-        updatedAt: now
+        updatedAt: now,
+        imageUrl: imagePlaceholders[config.category] || defaultImage
       });
     }
 
