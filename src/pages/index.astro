@@ -196,12 +196,11 @@ const liveEventsCount = events.length; // Cambiado temporalmente al total de eve
       tl.from('header', { y: -30, opacity: 0 })
         .from('aside', { x: -30, opacity: 0, duration: 0.6 }, '-=0.4')
         .from('.flex-grow', { y: 30, opacity: 0, duration: 0.6 }, '-=0.4')
-        .from('.event-wrapper', {
+        .from('.events-grid', {
           y: 30,
           opacity: 0,
-          stagger: 0.05,
           duration: 0.6,
-          clearProps: 'all', // ¡Crucial! Limpia los estilos en línea de GSAP al terminar para que los filtros CSS funcionen sin conflicto
+          clearProps: 'opacity,transform',
           onComplete: () => {
             ScrollTrigger.refresh();
           }
