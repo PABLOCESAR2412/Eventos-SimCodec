@@ -233,13 +233,36 @@ const dates = [
     // Pagination State
     let currentPage = 1;
     let pageSizeSelect = document.getElementById('page-size') as HTMLSelectElement;
-    let itemsPerPage = parseInt(pageSizeSelect?.value || '24', 10);
+    let itemsPerPage = parseInt(pageSizeSelect?.value || '12', 10);
     
     const prevBtn = document.getElementById('prev-page') as HTMLButtonElement;
     const nextBtn = document.getElementById('next-page') as HTMLButtonElement;
     const pageNumbersContainer = document.getElementById('page-numbers');
     const paginationContainer = document.getElementById('pagination-container');
     
+    function changePage(newPage: number) {
+      if (newPage === currentPage) return;
+      const grid = document.querySelector('.events-grid') as HTMLElement;
+      
+      // Smooth fade out
+      if (grid) grid.style.opacity = '0';
+      
+      setTimeout(() => {
+        currentPage = newPage;
+        applyFilters(false);
+        
+        // Scroll exactly to search container with header offset
+        const searchContainer = document.getElementById('global-search')?.closest('.mb-10');
+        if (searchContainer) {
+          const y = searchContainer.getBoundingClientRect().top + window.scrollY - 100; 
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+        
+        // Smooth fade in
+        if (grid) grid.style.opacity = '1';
+      }, 300); // Waits for the opacity transition
+    }
+
     function applyFilters(resetPage = false) {
       if (resetPage) currentPage = 1;
       
@@ -356,24 +379,38 @@ const dates = [
         
         pageNumbersContainer.innerHTML = '';
         
-        // Mostrar hasta 5 números de página para no romper el layout
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, startPage + 4);
-        
-        if (endPage - startPage < 4) {
-          startPage = Math.max(1, endPage - 4);
-        }
-        
-        for (let i = startPage; i <= endPage; i++) {
+        const createBtn = (num: number, text = num.toString()) => {
           const btn = document.createElement('button');
-          btn.textContent = i.toString();
-          btn.className = `px-3 py-1 rounded-md text-sm font-medium transition-colors ${i === currentPage ? 'bg-[var(--color-sim-action)] text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`;
-          btn.onclick = () => {
-            currentPage = i;
-            applyFilters(false);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          };
-          pageNumbersContainer.appendChild(btn);
+          btn.textContent = text;
+          btn.className = `px-3 py-1 rounded-md text-sm font-medium transition-colors ${num === currentPage ? 'bg-[var(--color-sim-action)] text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`;
+          btn.onclick = () => changePage(num);
+          return btn;
+        };
+        
+        const createEllipsis = () => {
+          const span = document.createElement('span');
+          span.textContent = '...';
+          span.className = 'px-2 text-gray-500 font-medium select-none';
+          return span;
+        };
+
+        if (totalPages <= 7) {
+          for (let i = 1; i <= totalPages; i++) pageNumbersContainer.appendChild(createBtn(i));
+        } else {
+          // Mostrar 1, ..., X, Y, Z, ..., N
+          pageNumbersContainer.appendChild(createBtn(1));
+          if (currentPage > 3) pageNumbersContainer.appendChild(createEllipsis());
+          
+          let start = Math.max(2, currentPage - 1);
+          let end = Math.min(totalPages - 1, currentPage + 1);
+          
+          if (currentPage === 1) end = 3;
+          if (currentPage === totalPages) start = totalPages - 2;
+          
+          for (let i = start; i <= end; i++) pageNumbersContainer.appendChild(createBtn(i));
+          
+          if (currentPage < totalPages - 2) pageNumbersContainer.appendChild(createEllipsis());
+          pageNumbersContainer.appendChild(createBtn(totalPages));
         }
       }
 
@@ -406,19 +443,13 @@ const dates = [
     
     if (prevBtn) {
       prevBtn.addEventListener('click', () => {
-        if (currentPage > 1) {
-          currentPage--;
-          applyFilters(false);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        if (currentPage > 1) changePage(currentPage - 1);
       });
     }
     
     if (nextBtn) {
       nextBtn.addEventListener('click', () => {
-        currentPage++;
-        applyFilters(false);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (currentPage < totalPages) changePage(currentPage + 1);
       });
     }
     

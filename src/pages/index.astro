@@ -96,7 +96,7 @@ const liveEventsCount = events.length; // Cambiado temporalmente al total de eve
         </span>
       </div>
 
-      <div class="events-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div class="events-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 transition-opacity duration-300">
         {events.map((event) => (
           <div 
             class="event-wrapper"
@@ -119,8 +119,8 @@ const liveEventsCount = events.length; // Cambiado temporalmente al total de eve
         <div class="flex items-center gap-3">
           <label for="page-size" class="text-sm font-semibold text-gray-600 dark:text-gray-400">Mostrar:</label>
           <select id="page-size" class="bg-gray-100 dark:bg-gray-800 border-none rounded-lg text-sm font-bold text-[var(--text-color)] py-2 px-3 cursor-pointer focus:ring-2 focus:ring-[var(--color-sim-action)] transition-colors">
-            <option value="12">12</option>
-            <option value="24" selected>24</option>
+            <option value="12" selected>12</option>
+            <option value="24">24</option>
             <option value="48">48</option>
             <option value="1000">Todos</option>
           </select>
