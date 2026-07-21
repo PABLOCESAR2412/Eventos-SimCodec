@@ -42,30 +42,30 @@
   }
 
 
-  /* SimCodec Custom Scrollbar */
+  /* SimCodec Custom Scrollbar - Optimized for smooth transitions */
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
   }
 
   ::-webkit-scrollbar-track {
-    background: var(--bg-color);
-    border-left: 1px solid var(--border-color);
+    background: transparent; /* Permite ver el fondo del body que ya tiene transición */
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--color-sim-primary);
-    border-radius: 4px;
-    border: 2px solid var(--bg-color);
+    background-color: var(--color-sim-primary);
+    border-radius: 10px;
+    border: 3px solid transparent;
+    background-clip: padding-box; /* Borde transparente actúa como padding */
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-sim-brand);
+    background-color: var(--color-sim-brand);
   }
 
   /* For Firefox */
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-sim-primary) var(--bg-color);
+    scrollbar-color: var(--color-sim-primary) transparent;
   }
 }
