@@ -136,17 +136,21 @@ const lang = getLangFromUrl(Astro.url);
       gsap.ticker.lagSmoothing(0);
 
       // Loading Screen Logic
-      window.addEventListener('load', () => {
+      const hideLoader = () => {
         const loader = document.getElementById('initial-loader');
         if (loader) {
-          // Pequeño delay extra para asegurar que las fuentes y layout estén parseados
-          setTimeout(() => {
-            loader.style.opacity = '0';
-            loader.style.visibility = 'hidden';
-            setTimeout(() => loader.remove(), 700); // Remover del DOM luego de la transición
-          }, 300);
+          loader.style.opacity = '0';
+          loader.style.visibility = 'hidden';
+          setTimeout(() => loader.remove(), 700); // Remover del DOM luego de la transición
         }
-      });
+      };
+
+      // No esperamos a que carguen todas las imágenes (window.load), solo a que el DOM esté listo
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        setTimeout(hideLoader, 600); // 600ms de tiempo mínimo visual
+      } else {
+        document.addEventListener('DOMContentLoaded', () => setTimeout(hideLoader, 600));
+      }
 
       // Theme Toggle Logic
       const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
