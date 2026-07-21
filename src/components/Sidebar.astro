@@ -367,7 +367,7 @@ const dates = [
         for (let i = startPage; i <= endPage; i++) {
           const btn = document.createElement('button');
           btn.textContent = i.toString();
-          btn.className = \`px-3 py-1 rounded-md text-sm font-medium transition-colors \${i === currentPage ? 'bg-[var(--color-sim-action)] text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}\`;
+          btn.className = `px-3 py-1 rounded-md text-sm font-medium transition-colors ${i === currentPage ? 'bg-[var(--color-sim-action)] text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`;
           btn.onclick = () => {
             currentPage = i;
             applyFilters(false);
