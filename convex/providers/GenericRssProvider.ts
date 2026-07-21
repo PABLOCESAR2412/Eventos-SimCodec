@@ -83,7 +83,8 @@ export class GenericRssProvider implements IOpportunityProvider {
           if (!feed.isSpecificEventFeed) {
             const keywords = [
               "event", "webinar", "conference", "summit", "course", "hackathon", "scholarship", "beca", "taller", "curso", "meetup", "bootcamp", "training", "fellowship", "apply", "registration",
-              "conferencia", "congreso", "charla", "workshop", "seminario", "feria", "networking"
+              "conferencia", "congreso", "charla", "workshop", "seminario", "feria", "networking", "diplomado", "certificación", "capacitación", "concurso", "olimpiada", 
+              "convocatoria", "incubadora", "aceleradora", "startup", "demo day", "pitch", "grant", "fondo", "capital semilla", "mentoría", "empleo", "recruiting", "career"
             ];
             const lowerTitle = title.toLowerCase();
             const hasKeyword = keywords.some(k => lowerTitle.includes(k));
