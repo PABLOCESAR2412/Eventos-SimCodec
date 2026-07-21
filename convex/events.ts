@@ -68,14 +68,14 @@ export const saveEvents = internalMutation({
       if (event.externalId) {
         existing = await ctx.db
           .query("events")
-          .filter((q) => q.eq(q.field("externalId"), event.externalId))
+          .withIndex("by_externalId", (q) => q.eq("externalId", event.externalId))
           .first();
       }
       
-      if (!existing) {
+      if (!existing && event.registrationUrl) {
         existing = await ctx.db
           .query("events")
-          .filter((q) => q.eq(q.field("registrationUrl"), event.registrationUrl))
+          .withIndex("by_registrationUrl", (q) => q.eq("registrationUrl", event.registrationUrl))
           .first();
       }
         

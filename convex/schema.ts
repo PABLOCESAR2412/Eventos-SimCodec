@@ -55,7 +55,9 @@ export default defineSchema({
     .index("by_category", ["category"])
     .index("by_date", ["dateStart"])
     .index("by_source", ["source"])
-    .index("by_status", ["status"]),
+    .index("by_status", ["status"])
+    .index("by_externalId", ["externalId"])
+    .index("by_registrationUrl", ["registrationUrl"]),
     
   cronLogs: defineTable({
     taskName: v.string(),

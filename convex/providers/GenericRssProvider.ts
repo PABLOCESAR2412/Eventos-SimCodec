@@ -60,7 +60,54 @@ export class GenericRssProvider implements IOpportunityProvider {
     { url: "https://news.google.com/rss/search?q=IEEE+Ecuador+congreso&hl=es-419&gl=EC&ceid=EC:es-419", sourceName: "IEEE Ecuador", category: "Comunidad", subcategory: "Ecuador", country: "Ecuador", isSpecificEventFeed: false },
     { url: "https://news.google.com/rss/search?q=Women+Techmakers+Ecuador&hl=es-419&gl=EC&ceid=EC:es-419", sourceName: "Women Techmakers", category: "Comunidad", subcategory: "Ecuador", country: "Ecuador", isSpecificEventFeed: false },
     { url: "https://news.google.com/rss/search?q=ESPE+tecnologia+congreso&hl=es-419&gl=EC&ceid=EC:es-419", sourceName: "ESPE", category: "Comunidad", subcategory: "Ecuador", country: "Ecuador", isSpecificEventFeed: false },
-    { url: "https://news.google.com/rss/search?q=Yachay+Tech+evento&hl=es-419&gl=EC&ceid=EC:es-419", sourceName: "Yachay Tech", category: "Comunidad", subcategory: "Ecuador", country: "Ecuador", isSpecificEventFeed: false }
+    { url: "https://news.google.com/rss/search?q=Yachay+Tech+evento&hl=es-419&gl=EC&ceid=EC:es-419", sourceName: "Yachay Tech", category: "Comunidad", subcategory: "Ecuador", country: "Ecuador", isSpecificEventFeed: false },
+    
+    // === DYNAMIC SUBCATEGORIES REQUESTED BY USER ===
+    ...([
+      { q: "Conferencias de tecnología OR tech conferences", category: "Eventos", subcategory: "Conferencias" },
+      { q: "Congresos de tecnología OR tech congress", category: "Eventos", subcategory: "Congresos" },
+      { q: "Charlas de tecnología OR tech talks", category: "Eventos", subcategory: "Charlas" },
+      { q: "Meetups de tecnología OR tech meetups", category: "Eventos", subcategory: "Meetups" },
+      { q: "Workshops de tecnología OR tech workshops", category: "Eventos", subcategory: "Workshops" },
+      { q: "Seminarios de tecnología OR tech seminars", category: "Eventos", subcategory: "Seminarios" },
+      { q: "Ferias Tecnológicas OR tech fairs", category: "Eventos", subcategory: "Ferias Tecnológicas" },
+      { q: "Ferias Empresariales tech", category: "Eventos", subcategory: "Ferias Empresariales" },
+      { q: "Networking tech events", category: "Eventos", subcategory: "Networking" },
+      { q: "Webinars de tecnología OR tech webinars", category: "Eventos", subcategory: "Webinars" },
+      { q: "Bootcamps programación OR coding bootcamps", category: "Formación", subcategory: "Bootcamps" },
+      { q: "Diplomados en tecnología OR tech diplomas", category: "Formación", subcategory: "Diplomados" },
+      { q: "Certificaciones tecnológicas OR tech certifications", category: "Formación", subcategory: "Certificaciones" },
+      { q: "Talleres de tecnología OR tech workshops", category: "Formación", subcategory: "Talleres" },
+      { q: "Programas de Capacitación tech", category: "Formación", subcategory: "Programas de Capacitación" },
+      { q: "Concursos de tecnología OR tech contests", category: "Competencias", subcategory: "Concursos" },
+      { q: "Olimpiadas de programación OR programming olympiads", category: "Competencias", subcategory: "Olimpiadas" },
+      { q: "Competencias de IA OR AI competitions", category: "Competencias", subcategory: "Competencias de IA" },
+      { q: "Competencias de Ciencia de Datos OR Data Science competitions", category: "Competencias", subcategory: "Competencias de Ciencia de Datos" },
+      { q: "Competencias de Programación OR competitive programming", category: "Competencias", subcategory: "Competencias de Programación" },
+      { q: "Convocatorias startups OR startup calls", category: "Emprendimiento", subcategory: "Convocatorias" },
+      { q: "Incubadoras de startups OR startup incubators", category: "Emprendimiento", subcategory: "Incubadoras" },
+      { q: "Aceleradoras de startups OR startup accelerators", category: "Emprendimiento", subcategory: "Aceleradoras" },
+      { q: "Demo Days startups", category: "Emprendimiento", subcategory: "Demo Days" },
+      { q: "Pitch Competitions startups", category: "Emprendimiento", subcategory: "Pitch Competitions" },
+      { q: "Grants para tecnología OR tech grants", category: "Financiamiento", subcategory: "Grants" },
+      { q: "Fondos de Innovación OR innovation funds", category: "Financiamiento", subcategory: "Fondos de Innovación" },
+      { q: "Capital Semilla startups OR seed capital", category: "Financiamiento", subcategory: "Capital Semilla" },
+      { q: "Fondos de Investigación tech", category: "Financiamiento", subcategory: "Fondos de Investigación" },
+      { q: "Mentorías en tecnología OR tech mentoring", category: "Comunidad", subcategory: "Mentorías" },
+      { q: "Comunidades Tech OR tech communities", category: "Comunidad", subcategory: "Comunidades Tech" },
+      { q: "User Groups tech", category: "Comunidad", subcategory: "User Groups" },
+      { q: "Ferias de Empleo tech OR tech job fairs", category: "Empleo", subcategory: "Ferias de Empleo" },
+      { q: "Recruiting Events tech", category: "Empleo", subcategory: "Recruiting Events" },
+      { q: "Career Days tech", category: "Empleo", subcategory: "Career Days" },
+      { q: "Tech Recruiting events", category: "Empleo", subcategory: "Tech Recruiting" }
+    ].map(f => ({
+      url: `https://news.google.com/rss/search?q=${encodeURIComponent(f.q)}&hl=es-419&gl=US&ceid=US:es-419`,
+      sourceName: "News",
+      category: f.category,
+      subcategory: f.subcategory,
+      country: "Global",
+      isSpecificEventFeed: false
+    })))
   ];
 
   async obtenerOportunidades(): Promise<RawOpportunity[]> {

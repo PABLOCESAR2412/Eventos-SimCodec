@@ -31,6 +31,7 @@ const events = rawEvents.map((e: any) => ({
   url: e.registrationUrl,
   source: e.source,
   category: e.category,
+  subcategory: e.subcategory,
   location: { city: e.city || (e.isVirtual ? 'Virtual' : 'Presencial'), isVirtual: e.isVirtual, address: e.address },
   date: { start: new Date(e.dateStart), end: e.dateEnd ? new Date(e.dateEnd) : undefined },
   isLive: false, // O calcular aquí si e.dateStart <= Date.now() y endDate...
@@ -101,11 +102,12 @@ const liveEventsCount = events.length; // Cambiado temporalmente al total de eve
             class="event-wrapper opacity-0 translate-y-8"
             data-city={event.location.city}
             data-category={event.category}
+            data-subcategory={event.subcategory || ''}
             data-source={event.source}
             data-modality={event.location.isVirtual ? 'virtual' : 'presential'}
             data-cost={event.isFree ? 'free' : 'paid'}
             data-date={event.date.start.getTime()}
-            data-search={`${event.title} ${event.description || ''} ${event.category} ${event.source}`.toLowerCase()}
+            data-search={`${event.title} ${event.description || ''} ${event.category} ${event.subcategory || ''} ${event.source}`.toLowerCase()}
           >
             <EventCard event={event} />
           </div>
