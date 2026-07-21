@@ -99,7 +99,7 @@ const liveEventsCount = events.length; // Cambiado temporalmente al total de eve
       <div class="events-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {events.map((event) => (
           <div 
-            class="event-wrapper opacity-0 translate-y-8"
+            class="event-wrapper"
             data-city={event.location.city}
             data-category={event.category}
             data-subcategory={event.subcategory || ''}
@@ -187,18 +187,25 @@ const liveEventsCount = events.length; // Cambiado temporalmente al total de eve
     import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
     document.addEventListener('DOMContentLoaded', () => {
-      // Animación de entrada
-      gsap.to('.event-wrapper', {
-        y: 0,
-        opacity: 1,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: '.events-grid',
-          start: 'top 85%',
-        }
+      // Animación de entrada general unificada y prolija
+      const tl = gsap.timeline({ 
+        defaults: { ease: 'power3.out', duration: 0.8 },
+        delay: 0.2 // Pequeño delay para dejar que la pantalla de carga se oculte suavemente
       });
+      
+      tl.from('header', { y: -30, opacity: 0 })
+        .from('aside', { x: -30, opacity: 0, duration: 0.6 }, '-=0.4')
+        .from('.flex-grow', { y: 30, opacity: 0, duration: 0.6 }, '-=0.4')
+        .from('.event-wrapper', {
+          y: 30,
+          opacity: 0,
+          stagger: 0.05,
+          duration: 0.6,
+          clearProps: 'all', // ¡Crucial! Limpia los estilos en línea de GSAP al terminar para que los filtros CSS funcionen sin conflicto
+          onComplete: () => {
+            ScrollTrigger.refresh();
+          }
+        }, '-=0.2');
 
       // Contador
       document.addEventListener('filters:changed', (e: any) => {

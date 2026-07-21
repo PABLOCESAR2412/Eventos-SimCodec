@@ -79,7 +79,8 @@ const lang = getLangFromUrl(Astro.url);
     <div id="initial-loader" class="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-[var(--bg-color)] transition-all duration-700">
       <div class="relative w-56 flex flex-col items-center">
         <!-- Logo con animación de respiración -->
-        <img src="/loading_logo.png" alt="Cargando SimCodec..." class="w-full h-auto animate-pulse" />
+        <img src="/loading_logo_dark.png" alt="Cargando SimCodec..." class="w-full h-auto animate-pulse block dark:hidden" />
+        <img src="/loading_logo.png" alt="Cargando SimCodec..." class="w-full h-auto animate-pulse hidden dark:block" />
         <!-- Barra de progreso indeterminada -->
         <div class="mt-8 w-32 h-1 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
           <div class="h-full bg-[var(--color-sim-brand)] rounded-full loader-bar"></div>
