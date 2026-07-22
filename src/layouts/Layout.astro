@@ -70,7 +70,7 @@ const { title, description } = Astro.props;
       window.localStorage.setItem('theme', theme);
     </script>
   </head>
-  <body class="bg-[var(--bg-color)] text-[var(--text-color)] font-sans antialiased selection:bg-[var(--color-sim-action)] selection:text-white transition-colors duration-300">
+  <body class="bg-[var(--bg-color)] text-[var(--text-color)] font-sans antialiased selection:bg-[var(--color-sim-action)] selection:text-white transition-colors duration-300 overflow-hidden">
     
     <!-- Pantalla de Carga Inicial -->
     <div id="initial-loader" class="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-[var(--bg-color)] transition-all duration-700">
@@ -95,6 +95,11 @@ const { title, description } = Astro.props;
         100% { transform: translateX(200%); width: 100%; }
       }
     </style>
+
+    <!-- Background Pattern -->
+    <div class="fixed inset-0 pointer-events-none z-[-1] opacity-40 dark:opacity-20 transition-opacity duration-300">
+      <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+    </div>
     
     <!-- Top Nav con Logo -->
     <nav class="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 py-4 bg-white/90 dark:bg-[#0A0A0C]/90 backdrop-blur-md border-b border-[var(--border-color)] transition-colors duration-300">
@@ -137,6 +142,7 @@ const { title, description } = Astro.props;
         if (loader) {
           loader.style.opacity = '0';
           loader.style.visibility = 'hidden';
+          document.body.classList.remove('overflow-hidden'); // Mostrar el scrollbar suavemente
           setTimeout(() => loader.remove(), 700); // Remover del DOM luego de la transición
         }
       };
