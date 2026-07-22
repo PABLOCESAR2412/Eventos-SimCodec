@@ -72,12 +72,12 @@ const liveEventsCount = events.length; // Cambiado temporalmente al total de eve
       <!-- Barra de Búsqueda Dinámica -->
       <div class="mb-10 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm transition-colors duration-300">
         <div class="w-full relative flex items-center bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-800 rounded-xl focus-within:border-[var(--color-sim-action)] focus-within:ring-4 focus-within:ring-[var(--color-sim-action)]/20 transition-all duration-300 p-1.5">
-          <svg class="w-5 h-5 ml-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          <svg class="w-5 h-5 ml-4 text-gray-400 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           <input 
             type="text" 
             id="global-search"
             placeholder="Escribe para filtrar eventos, tecnologías o congresos instantáneamente..." 
-            class="flex-1 bg-transparent border-none outline-none px-4 py-2.5 text-gray-900 dark:text-white placeholder-gray-500 text-base font-medium"
+            class="flex-1 bg-transparent border-none outline-none px-4 py-2.5 text-gray-900 dark:text-white placeholder-gray-500 text-base font-medium transition-colors duration-300"
           />
           <button id="clear-search" class="hidden bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white font-bold py-2.5 px-4 rounded-lg transition-colors duration-200 uppercase text-xs tracking-wider">
             Borrar
@@ -113,8 +113,8 @@ const liveEventsCount = events.length; // Cambiado temporalmente al total de eve
       <!-- Pagination Controls -->
       <div id="pagination-container" class="flex flex-col md:flex-row items-center justify-between gap-4 mt-12 bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-800 rounded-2xl p-4 shadow-sm transition-colors duration-300">
         <div class="flex items-center gap-3">
-          <label for="page-size" class="text-sm font-semibold text-gray-600 dark:text-gray-400">Mostrar:</label>
-          <select id="page-size" class="bg-gray-100 dark:bg-gray-800 border-none rounded-lg text-sm font-bold text-[var(--text-color)] py-2 px-3 cursor-pointer focus:ring-2 focus:ring-[var(--color-sim-action)] transition-colors">
+          <label for="page-size" class="text-sm font-semibold text-gray-600 dark:text-gray-400 transition-colors duration-300">Mostrar:</label>
+          <select id="page-size" class="bg-gray-100 dark:bg-gray-800 border-none rounded-lg text-sm font-bold text-[var(--text-color)] py-2 px-3 cursor-pointer focus:ring-2 focus:ring-[var(--color-sim-action)] transition-colors duration-300">
             <option value="12" selected>12</option>
             <option value="24">24</option>
             <option value="48">48</option>
@@ -123,7 +123,7 @@ const liveEventsCount = events.length; // Cambiado temporalmente al total de eve
         </div>
         
         <div class="flex items-center gap-2">
-          <button id="prev-page" class="p-2 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" aria-label="Página anterior">
+          <button id="prev-page" class="p-2 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300" aria-label="Página anterior">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
           </button>
           
@@ -131,7 +131,7 @@ const liveEventsCount = events.length; // Cambiado temporalmente al total de eve
             <!-- Números de página inyectados por JS -->
           </div>
           
-          <button id="next-page" class="p-2 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" aria-label="Siguiente página">
+          <button id="next-page" class="p-2 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300" aria-label="Siguiente página">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
           </button>
         </div>

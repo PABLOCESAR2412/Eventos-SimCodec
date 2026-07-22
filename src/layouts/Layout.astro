@@ -105,9 +105,9 @@ const { title, description } = Astro.props;
     <nav class="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 py-4 bg-white/90 dark:bg-[#0A0A0C]/90 backdrop-blur-md border-b border-[var(--border-color)] transition-colors duration-300">
       <div class="flex items-center gap-3">
         <!-- SimCodec Logo -->
-        <a href="/" class="flex items-center gap-2" aria-label="SimCodec Home">
-          <img src="/logos/logo_color.png" alt="SimCodec Logo" class="h-8 block dark:hidden" />
-          <img src="/logos/logo_blanco.png" alt="SimCodec Logo" class="h-8 hidden dark:block" />
+        <a href="/" class="relative block w-[140px] h-[32px]" aria-label="SimCodec Home">
+          <img src="/logos/logo_color.png" alt="SimCodec Logo" class="absolute inset-0 w-full h-full object-contain transition-opacity duration-300 opacity-100 dark:opacity-0" />
+          <img src="/logos/logo_blanco.png" alt="SimCodec Logo" class="absolute inset-0 w-full h-full object-contain transition-opacity duration-300 opacity-0 dark:opacity-100" />
         </a>
       </div>
       <div class="flex items-center gap-4">

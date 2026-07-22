@@ -42,7 +42,7 @@ const dates = [
         <svg class="w-5 h-5 text-[var(--color-sim-action)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
         Filtros
       </h2>
-      <button id="clear-filters" class="text-xs text-[var(--color-sim-orange)] hover:text-orange-500 transition-colors font-semibold hidden">
+      <button id="clear-filters" class="text-xs text-[var(--color-sim-orange)] hover:text-orange-500 transition-colors duration-300 font-semibold hidden">
         Limpiar
       </button>
     </div>
@@ -58,10 +58,10 @@ const dates = [
           <label class="flex items-center gap-3 cursor-pointer group/item">
             <div class="relative flex items-center">
               <input type="checkbox" class="peer sr-only filter-input" name="category" value={category} />
-              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
-              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors duration-300"></div>
+              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors">{category}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{category}</span>
           </label>
         ))}
       </div>
@@ -80,10 +80,10 @@ const dates = [
           <label class="flex items-center gap-3 cursor-pointer group/item">
             <div class="relative flex items-center">
               <input type="checkbox" class="peer sr-only filter-input" name="source" value={source} />
-              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
-              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors duration-300"></div>
+              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors">{source}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{source}</span>
           </label>
         ))}
       </div>
@@ -102,10 +102,10 @@ const dates = [
           <label class="flex items-center gap-3 cursor-pointer group/item">
             <div class="relative flex items-center">
               <input type="checkbox" class="peer sr-only filter-input" name="topic" value={topic} />
-              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
-              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors duration-300"></div>
+              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors">{topic}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{topic}</span>
           </label>
         ))}
       </div>
@@ -124,10 +124,10 @@ const dates = [
           <label class="flex items-center gap-3 cursor-pointer group/item">
             <div class="relative flex items-center">
               <input type="radio" class="peer sr-only filter-input" name="date" value={date.value} />
-              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded-full bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
-              <div class="absolute w-2 h-2 bg-white rounded-full left-1.5 top-1.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity"></div>
+              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded-full bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors duration-300"></div>
+              <div class="absolute w-2 h-2 bg-white rounded-full left-1.5 top-1.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity duration-300"></div>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors">{date.label}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{date.label}</span>
           </label>
         ))}
       </div>
@@ -146,10 +146,10 @@ const dates = [
           <label class="flex items-center gap-3 cursor-pointer group/item">
             <div class="relative flex items-center">
               <input type="checkbox" class="peer sr-only filter-input" name="modality" value={mod.value} />
-              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
-              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors duration-300"></div>
+              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors">{mod.label}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{mod.label}</span>
           </label>
         ))}
       </div>
@@ -168,10 +168,10 @@ const dates = [
           <label class="flex items-center gap-3 cursor-pointer group/item">
             <div class="relative flex items-center">
               <input type="checkbox" class="peer sr-only filter-input" name="cost" value={cost.value} />
-              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
-              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors duration-300"></div>
+              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors">{cost.label}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{cost.label}</span>
           </label>
         ))}
       </div>
@@ -190,10 +190,10 @@ const dates = [
           <label class="flex items-center gap-3 cursor-pointer group/item">
             <div class="relative flex items-center">
               <input type="checkbox" class="peer sr-only filter-input" name="city" value={city} />
-              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors"></div>
-              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+              <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors duration-300"></div>
+              <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors">{city}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{city}</span>
           </label>
         ))}
       </div>
@@ -377,7 +377,7 @@ const dates = [
         const createBtn = (num: number, text = num.toString()) => {
           const btn = document.createElement('button');
           btn.textContent = text;
-          btn.className = `px-3 py-1 rounded-md text-sm font-medium transition-colors ${num === currentPage ? 'bg-[var(--color-sim-action)] text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`;
+          btn.className = `px-3 py-1 rounded-md text-sm font-medium transition-colors duration-300 ${num === currentPage ? 'bg-[var(--color-sim-action)] text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`;
           btn.onclick = () => changePage(num);
           return btn;
         };
@@ -389,22 +389,23 @@ const dates = [
           return span;
         };
 
-        if (totalPages <= 7) {
-          for (let i = 1; i <= totalPages; i++) pageNumbersContainer.appendChild(createBtn(i));
-        } else {
-          // Mostrar 1, ..., X, Y, Z, ..., N
+        // Lógica de Paginación en Bloques de 5 (Group-based pagination)
+        const PAGES_PER_GROUP = 5;
+        const currentGroup = Math.ceil(currentPage / PAGES_PER_GROUP);
+        const start = (currentGroup - 1) * PAGES_PER_GROUP + 1;
+        const end = Math.min(start + PAGES_PER_GROUP - 1, totalPages);
+
+        if (start > 1) {
           pageNumbersContainer.appendChild(createBtn(1));
-          if (currentPage > 3) pageNumbersContainer.appendChild(createEllipsis());
-          
-          let start = Math.max(2, currentPage - 1);
-          let end = Math.min(totalPages - 1, currentPage + 1);
-          
-          if (currentPage === 1) end = 3;
-          if (currentPage === totalPages) start = totalPages - 2;
-          
-          for (let i = start; i <= end; i++) pageNumbersContainer.appendChild(createBtn(i));
-          
-          if (currentPage < totalPages - 2) pageNumbersContainer.appendChild(createEllipsis());
+          pageNumbersContainer.appendChild(createEllipsis());
+        }
+
+        for (let i = start; i <= end; i++) {
+          pageNumbersContainer.appendChild(createBtn(i));
+        }
+
+        if (end < totalPages) {
+          pageNumbersContainer.appendChild(createEllipsis());
           pageNumbersContainer.appendChild(createBtn(totalPages));
         }
       }
