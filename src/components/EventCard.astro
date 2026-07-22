@@ -1,6 +1,5 @@
 ---
 import type { TechEvent } from '../types';
-import { getLangFromUrl, useTranslations } from '../i18n/utils';
 
 interface Props {
   event: TechEvent;
@@ -8,9 +7,6 @@ interface Props {
 
 const { event } = Astro.props;
 const { title, description, category, location, date, imageUrl, source, isLive, isFree, price } = event;
-
-const lang = getLangFromUrl(Astro.url);
-const t = useTranslations(lang);
 
 ---
 

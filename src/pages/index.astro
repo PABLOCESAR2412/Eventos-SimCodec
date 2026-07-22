@@ -2,12 +2,8 @@
 import Layout from '../layouts/Layout.astro';
 import Sidebar from '../components/Sidebar.astro';
 import EventCard from '../components/EventCard.astro';
-import { getLangFromUrl, useTranslations } from '../i18n/utils';
 import { convex } from '../lib/convex';
 import { api } from '../../convex/_generated/api';
-
-const lang = getLangFromUrl(Astro.url);
-const t = useTranslations(lang);
 
 Astro.response.headers.set('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=120');
 
@@ -58,9 +54,9 @@ const liveEventsCount = events.length; // Cambiado temporalmente al total de eve
         <span class="text-xs font-bold text-[var(--color-sim-brand)] tracking-wide uppercase">SIMCODEC EVENT PLATFORM</span>
       </div>
       
-      <h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 text-gray-900 dark:text-white leading-[1.1] transition-colors duration-300">
-        {t('hero.title1')}<span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-sim-primary)] to-[var(--color-sim-brand)] dark:from-[var(--color-sim-brand)] dark:to-teal-300 ml-3 transition-colors duration-300">{t('hero.title2')}</span><br />
-        {t('hero.title3')}
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-[var(--text-color)] tracking-tight mb-6 leading-tight transition-colors duration-300">
+        Explora el futuro de la <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-sim-primary)] to-[var(--color-sim-brand)] dark:from-[var(--color-sim-brand)] dark:to-teal-300 ml-3 transition-colors duration-300">tecnología en Ecuador</span><br />
+        y expande tus conocimientos
       </h1>
       
       <p class="text-lg md:text-xl text-gray-700 dark:text-gray-400 max-w-2xl font-medium dark:font-light mb-10 transition-colors duration-300">
@@ -89,10 +85,10 @@ const liveEventsCount = events.length; // Cambiado temporalmente al total de eve
         </div>
       </div>
 
-      <div class="flex justify-between items-center mb-8">
-        <h2 class="text-2xl font-bold text-[var(--text-color)] transition-colors duration-300">{t('main.title')}</h2>
-        <span id="results-count" class="text-sm font-medium text-gray-700 dark:text-gray-400 bg-gray-200 dark:bg-gray-800 px-3 py-1 rounded-full border border-gray-300 dark:border-[var(--border-color)] transition-colors duration-300" data-template={t('main.showing', { count: '{count}' })}>
-          {t('main.showing', { count: events.length })}
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+        <h2 class="text-2xl font-bold text-[var(--text-color)] transition-colors duration-300">Próximos Eventos y Cursos</h2>
+        <span id="results-count" class="text-sm font-medium text-gray-700 dark:text-gray-400 bg-gray-200 dark:bg-gray-800 px-3 py-1 rounded-full border border-gray-300 dark:border-[var(--border-color)] transition-colors duration-300" data-template="Mostrando {count} resultados">
+          Mostrando {events.length} resultados
         </span>
       </div>
 
@@ -148,7 +144,7 @@ const liveEventsCount = events.length; // Cambiado temporalmente al total de eve
       <div class="relative bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl transform scale-95 transition-all duration-300" id="modal-content">
         <div id="modal-image-container" class="relative h-64 bg-gray-100 dark:bg-gray-800 transition-colors duration-300">
           <img id="modal-img" src="" alt="Imagen del evento" class="w-full h-full object-cover" />
-          <button id="close-modal" class="absolute top-4 right-4 bg-white/80 dark:bg-black/50 text-gray-800 dark:text-white hover:bg-white dark:hover:bg-black/80 p-2 rounded-full backdrop-blur-sm transition-colors z-10" aria-label={t('modal.close')}>
+          <button id="close-modal" class="absolute top-4 right-4 bg-white/80 dark:bg-black/50 text-gray-800 dark:text-white hover:bg-white dark:hover:bg-black/80 p-2 rounded-full backdrop-blur-sm transition-colors z-10" aria-label="Cerrar modal">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
         </div>
