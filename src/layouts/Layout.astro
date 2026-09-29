@@ -26,8 +26,7 @@ const { title, description } = Astro.props;
     <!-- SEO & OpenGraph Meta Tags -->
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0A0A0C" media="(prefers-color-scheme: dark)" />
+    <meta id="theme-color" name="theme-color" content="#F8F9FA" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
@@ -53,21 +52,14 @@ const { title, description } = Astro.props;
     
     <!-- Theme Script to avoid FOUC -->
     <script is:inline>
-      const theme = (() => {
-        if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
-          return localStorage.getItem('theme');
-        }
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          return 'dark';
-        }
-        return 'light';
+      (() => {
+        let savedTheme;
+        try { savedTheme = localStorage.getItem('theme'); } catch { /* Storage may be blocked. */ }
+        const dark = savedTheme === 'dark' ||
+          (savedTheme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.classList.toggle('dark', dark);
+        document.getElementById('theme-color')?.setAttribute('content', dark ? '#0A0A0C' : '#F8F9FA');
       })();
-      if (theme === 'light') {
-        document.documentElement.classList.remove('dark');
-      } else {
-        document.documentElement.classList.add('dark');
-      }
-      window.localStorage.setItem('theme', theme);
     </script>
   </head>
   <body class="bg-[var(--bg-color)] text-[var(--text-color)] font-sans antialiased selection:bg-[var(--color-sim-action)] selection:text-white transition-colors duration-300 overflow-hidden">
@@ -157,35 +149,54 @@ const { title, description } = Astro.props;
       // Theme Toggle Logic
       const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
       const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
-      const themeToggleBtn = document.getElementById('theme-toggle');
+      const themeToggleBtn = document.getElementById('theme-toggle') as HTMLButtonElement | null;
 
       if (themeToggleDarkIcon && themeToggleLightIcon && themeToggleBtn) {
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-          themeToggleLightIcon.classList.remove('hidden');
-        } else {
-          themeToggleDarkIcon.classList.remove('hidden');
-        }
+        const root = document.documentElement;
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const syncThemeControls = () => {
+          const dark = root.classList.contains('dark');
+          themeToggleDarkIcon.classList.toggle('hidden', dark);
+          themeToggleLightIcon.classList.toggle('hidden', !dark);
+          themeToggleBtn.setAttribute('aria-pressed', String(dark));
+          themeToggleBtn.title = dark ? 'Activar tema claro' : 'Activar tema oscuro';
+          document.getElementById('theme-color')?.setAttribute('content', dark ? '#0A0A0C' : '#F8F9FA');
+        };
+        syncThemeControls();
+        const settleThemeStyles = () => new Promise<void>(resolve => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+        });
 
-        themeToggleBtn.addEventListener('click', function() {
-          themeToggleDarkIcon.classList.toggle('hidden');
-          themeToggleLightIcon.classList.toggle('hidden');
+        themeToggleBtn.addEventListener('click', async () => {
+          if (themeToggleBtn.disabled) return;
+          const dark = !root.classList.contains('dark');
+          const applyTheme = () => {
+            root.classList.toggle('dark', dark);
+            syncThemeControls();
+            try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch { /* Theme still works without storage. */ }
+          };
 
-          if (localStorage.getItem('theme')) {
-            if (localStorage.getItem('theme') === 'light') {
-              document.documentElement.classList.add('dark');
-              localStorage.setItem('theme', 'dark');
+          themeToggleBtn.disabled = true;
+          root.setAttribute('data-theme-switching', '');
+          try {
+            if (typeof document.startViewTransition === 'function' && !reducedMotion.matches) {
+              const transition = document.startViewTransition(applyTheme);
+              // A hidden document can skip snapshots while still applying the theme.
+              transition.ready.catch(() => {});
+              await transition.finished;
             } else {
-              document.documentElement.classList.remove('dark');
-              localStorage.setItem('theme', 'light');
+              // Older browsers and reduced motion use one immediate, synchronized change.
+              applyTheme();
+              await settleThemeStyles();
             }
-          } else {
-            if (document.documentElement.classList.contains('dark')) {
-              document.documentElement.classList.remove('dark');
-              localStorage.setItem('theme', 'light');
-            } else {
-              document.documentElement.classList.add('dark');
-              localStorage.setItem('theme', 'dark');
-            }
+          } catch {
+            applyTheme();
+            await settleThemeStyles();
+          } finally {
+            // Flush the final colors before restoring component hover/modal transitions.
+            void root.offsetWidth;
+            root.removeAttribute('data-theme-switching');
+            themeToggleBtn.disabled = false;
           }
         });
       }

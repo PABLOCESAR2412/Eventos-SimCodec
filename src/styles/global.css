@@ -26,6 +26,10 @@
     --text-color: var(--color-sim-ink);
     --border-color: var(--color-sim-border-light);
     --card-bg: #FFFFFF;
+    --theme-transition-duration: 250ms;
+    --theme-transition-easing: cubic-bezier(0.16, 1, 0.3, 1);
+    background-color: var(--bg-color);
+    color-scheme: light;
   }
 
   .dark {
@@ -33,6 +37,7 @@
     --text-color: #F8F9FA;
     --border-color: var(--color-sim-border-dark);
     --card-bg: #111827; /* Dark slate */
+    color-scheme: dark;
   }
 
   body {
@@ -68,4 +73,33 @@
     scrollbar-width: thin;
     scrollbar-color: var(--color-sim-primary) transparent;
   }
+}
+
+/* Theme changes share one viewport fade, including gradients, logos and controls.
+   Pause component transitions while capturing both themes so they cannot lag. */
+:root[data-theme-switching],
+:root[data-theme-switching] *,
+:root[data-theme-switching] *::before,
+:root[data-theme-switching] *::after {
+  transition: none !important;
+}
+
+:root[data-theme-switching]::view-transition-group(root),
+:root[data-theme-switching]::view-transition-old(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+:root[data-theme-switching]::view-transition-new(root) {
+  animation: theme-fade-in var(--theme-transition-duration) var(--theme-transition-easing) both;
+  mix-blend-mode: normal;
+}
+
+@keyframes theme-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --theme-transition-duration: 0ms; }
 }
