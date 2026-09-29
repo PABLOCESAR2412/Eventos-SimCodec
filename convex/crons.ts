@@ -1,34 +1,10 @@
 import { cronJobs } from "convex/server";
-import { api } from "./_generated/api";
-
+import { internal } from "./_generated/api";
 const crons = cronJobs();
-
-// 1. Sincronizar fuentes de APIs rápidas y confiables (Cada 6 horas)
-crons.interval(
-  "sync-apis-every-6-hours",
-  { hours: 6 },
-  api.actions.syncApiSources
-);
-
-// 2. Sincronizar RSS Feeds (Cada 12 horas)
-crons.interval(
-  "sync-rss-every-12-hours",
-  { hours: 12 },
-  api.actions.syncRssSources
-);
-
-// 3. Sincronizar Scraping Pesado (Cada 24 horas)
-crons.interval(
-  "sync-scraping-every-24-hours",
-  { hours: 24 },
-  api.actions.syncScrapingSources
-);
-
-// 4. Tarea para validación de links (Link Rotting detection) una vez al día
-crons.daily(
-  "validate-broken-links",
-  { hourUTC: 8, minuteUTC: 0 },
-  api.actions.validateEventLinks
-);
-
+crons.interval("sync-apis-every-6-hours", { hours: 6 }, internal.actions.syncApiSources);
+crons.interval("sync-rss-every-12-hours", { hours: 12 }, internal.actions.syncRssSources);
+crons.interval("sync-scraping-every-24-hours", { hours: 24 }, internal.actions.syncScrapingSources);
+crons.interval("validate-broken-links", { hours: 1 }, internal.actions.validateEventLinks);
+crons.interval("expire-events-and-retain-logs", { hours: 1 }, internal.maintenance.expire);
+crons.interval("archive-old-and-quarantined-events", { hours: 1 }, internal.maintenance.archive);
 export default crons;

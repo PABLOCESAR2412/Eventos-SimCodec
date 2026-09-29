@@ -1,0 +1,90 @@
+{
+  "checkedAt": "2026-09-29T22:30:35.272Z",
+  "adminAnonymousDenied": true,
+  "categoryPage": 9,
+  "searchPage": 9,
+  "jobs": [
+    {
+      "taskName": "syncScrapingSources",
+      "status": "SUCCESS",
+      "eventsAdded": 0,
+      "eventsUpdated": 0,
+      "eventsSkipped": 9,
+      "eventsRejected": 0,
+      "requests": 4,
+      "durationMs": 736,
+      "details": "Eventbrite Online: 8 candidates; Eventbrite Ecuador: 1 candidates"
+    },
+    {
+      "taskName": "syncScrapingSources",
+      "status": "SUCCESS",
+      "eventsAdded": 0,
+      "eventsUpdated": 8,
+      "eventsSkipped": 1,
+      "eventsRejected": 0,
+      "requests": 4,
+      "durationMs": 2910,
+      "details": "Eventbrite Online: 8 candidates; Eventbrite Ecuador: 1 candidates"
+    },
+    {
+      "taskName": "syncApiSources",
+      "status": "SUCCESS",
+      "eventsAdded": 0,
+      "eventsUpdated": 0,
+      "eventsSkipped": 10,
+      "eventsRejected": 0,
+      "requests": 2,
+      "durationMs": 405,
+      "details": "Devpost: 9 candidates; Coursera: unchanged HTTP 304"
+    },
+    {
+      "taskName": "syncScrapingSources",
+      "status": "SUCCESS",
+      "eventsAdded": 1,
+      "eventsUpdated": 8,
+      "eventsSkipped": 0,
+      "eventsRejected": 0,
+      "requests": 4,
+      "durationMs": 2208,
+      "details": "Eventbrite Online: 8 candidates; Eventbrite Ecuador: 1 candidates; CITEC: backoff; ESPOL: backoff; UCE: backoff"
+    },
+    {
+      "taskName": "syncScrapingSources",
+      "status": "SUCCESS",
+      "eventsAdded": 0,
+      "eventsUpdated": 0,
+      "eventsSkipped": 0,
+      "eventsRejected": 0,
+      "requests": 0,
+      "durationMs": 43,
+      "details": "Eventbrite Online: backoff; Eventbrite Ecuador: backoff; CITEC: backoff; ESPOL: backoff; UCE: backoff"
+    },
+    {
+      "taskName": "syncScrapingSources",
+      "status": "FAILED",
+      "eventsAdded": 0,
+      "eventsUpdated": 0,
+      "eventsSkipped": 0,
+      "eventsRejected": 0,
+      "requests": 5,
+      "durationMs": 2973,
+      "details": "No configured feeds with explicit event dates",
+      "errorMessage": "Eventbrite Online: Error: Redirect limit or missing location; Eventbrite Ecuador: Error: Redirect limit or missing location; CITEC: Error: HTTP 404; ESPOL: Error: HTTP 404; UCE: Error: HTTP 404"
+    }
+  ],
+  "archive": {
+    "originalEvents": 5145,
+    "archivedEvents": 5004,
+    "archives": 101,
+    "remainingEventsAfterArchive": 141,
+    "eventbriteAddedAfterArchive": 1,
+    "serializedEventBytesBefore": 7888253,
+    "serializedEventBytesAfterArchive": 241155
+  },
+  "gates": {
+    "astroCheck": "0 errors, 0 warnings",
+    "build": "passed",
+    "dependencyAudit": "no advisories",
+    "convexTypecheck": "passed"
+  }
+}

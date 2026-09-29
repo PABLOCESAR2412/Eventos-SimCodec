@@ -1,0 +1,10 @@
+.git/
+.backups/
+.agents/
+.env*
+PRODUCT.md
+AGENTS.md
+CLAUDE.md
+reports/
+check_db.ts
+check_active.ts

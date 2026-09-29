@@ -1,70 +1,33 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-
+import { eventFields } from "./lib/model";
 export default defineSchema({
   events: defineTable({
-    title: v.string(),
-    description: v.string(),
-    dateStart: v.number(), // timestamp
-    dateEnd: v.optional(v.number()), // timestamp
-    timeString: v.optional(v.string()),
-    externalId: v.optional(v.string()), // ID externo para evitar duplicados de APIs
-
-    // Ubicación
-    city: v.optional(v.string()),
-    province: v.optional(v.string()),
-    country: v.string(),
-    isVirtual: v.boolean(),
-    isHybrid: v.boolean(),
-    address: v.optional(v.string()),
-    mapUrl: v.optional(v.string()),
-
-    // Multimedia
-    imageUrl: v.optional(v.string()),
-
-    // Metadatos
-    organizer: v.optional(v.string()),
-    category: v.string(),
-    subcategory: v.optional(v.string()),
-
-    // Costo
-    isFree: v.boolean(),
-    price: v.optional(v.string()),
-
-    // URLs
-    officialUrl: v.optional(v.string()),
-    registrationUrl: v.string(),
-
-    // Estados
-    status: v.string(), // DRAFT, PUBLISHED, CANCELLED, FINISHED
-    language: v.string(),
-    durationMinutes: v.optional(v.number()),
-    tags: v.array(v.string()),
-
-    // Cupos
-    capacity: v.optional(v.number()),
-    availableSpots: v.optional(v.number()),
-
-    // Tracking
-    source: v.string(),
-    apiUsed: v.optional(v.string()),
-    isLinkValid: v.boolean(),
-    lastLinkCheck: v.optional(v.number()),
-    updatedAt: v.optional(v.number()),
+    ...eventFields, canonicalUrl: v.optional(v.string()), searchText: v.optional(v.string()),
+    expiresAt: v.optional(v.number()), lastLinkCheck: v.optional(v.number()),
+    nextLinkCheck: v.optional(v.number()), linkFailures: v.optional(v.number()),
+    lastLinkStatus: v.optional(v.number()), updatedAt: v.optional(v.number()),
+    quarantineReason: v.optional(v.string()), migrationVersion: v.optional(v.number()),
   })
-    .index("by_category", ["category"])
-    .index("by_date", ["dateStart"])
-    .index("by_source", ["source"])
-    .index("by_status", ["status"])
     .index("by_externalId", ["externalId"])
-    .index("by_registrationUrl", ["registrationUrl"]),
-    
+    .index("by_canonicalUrl", ["canonicalUrl"])
+    .index("by_catalog", ["status", "isLinkValid", "dateStart"])
+    .index("by_catalog_category", ["status", "isLinkValid", "category", "dateStart"])
+    .index("by_expiry", ["status", "expiresAt"])
+    .index("by_link_due", ["status", "nextLinkCheck"])
+    .searchIndex("search_catalog", { searchField: "searchText", filterFields: ["status", "isLinkValid"] }),
   cronLogs: defineTable({
-    taskName: v.string(),
-    status: v.string(),
-    eventsAdded: v.number(),
-    errorMessage: v.optional(v.string()),
-    details: v.optional(v.string()),
-    executedAt: v.number(),
+    taskName: v.string(), status: v.string(), eventsAdded: v.number(),
+    eventsUpdated: v.optional(v.number()), eventsSkipped: v.optional(v.number()),
+    eventsRejected: v.optional(v.number()), durationMs: v.optional(v.number()),
+    requests: v.optional(v.number()), nextRunAt: v.optional(v.number()),
+    errorMessage: v.optional(v.string()), details: v.optional(v.string()), executedAt: v.number(),
+  }).index("by_executedAt", ["executedAt"]),
+  sourceState: defineTable({
+    url: v.string(), etag: v.optional(v.string()), modified: v.optional(v.string()),
+    nextAttemptAt: v.number(), failures: v.number(),
+  }).index("by_url", ["url"]),
+  eventArchives: defineTable({
+    storageId: v.id("_storage"), count: v.number(), archivedAt: v.number(), status: v.string(),
   }),
 });

@@ -15,7 +15,7 @@ const topics = [
 
 // Orígenes (Fuentes)
 const sources = [
-  'Eventbrite', 'Luma', 'Devpost', 'MLH', 'Coursera', 'edX', 'AWS', 'Google Cloud', 
+  'Eventbrite', 'Luma', 'Devpost', 'MLH', 'Coursera', 'edX', 'AWS', 'Google Cloud',
   'Azure', 'OpenAI', 'HuggingFace', 'Startup Grind', 'Techstars', 'Fulbright', 'EPN', 'ESPOL'
 ];
 
@@ -35,7 +35,7 @@ const dates = [
 ---
 
 <aside class="w-full lg:w-72 flex-shrink-0 lg:sticky lg:top-36 z-10 lg:max-h-[calc(100vh-9rem)] overflow-y-auto custom-scrollbar rounded-2xl">
-  
+
   <div class="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-6 backdrop-blur-sm shadow-lg shadow-[var(--color-sim-primary)]/5 transition-colors duration-300">
     <div class="flex items-center justify-between mb-4 sticky top-0 bg-[var(--card-bg)] z-10 py-2">
       <h2 class="text-lg font-bold text-[var(--text-color)] flex items-center gap-2 transition-colors duration-300">
@@ -47,6 +47,7 @@ const dates = [
       </button>
     </div>
 
+    <button id="apply-filters" class="w-full mb-5 py-2 rounded-lg bg-[var(--color-sim-action)] text-white font-semibold">Aplicar filtros y búsqueda</button>
     <!-- Filtro de Categorías -->
     <details class="group mb-4" open>
       <summary class="flex justify-between items-center font-semibold text-gray-700 dark:text-gray-300 cursor-pointer list-none select-none">
@@ -220,254 +221,44 @@ const dates = [
 </style>
 
 <script>
-  // Filter Logic
   document.addEventListener('DOMContentLoaded', () => {
-    const inputs = document.querySelectorAll('.filter-input') as NodeListOf<HTMLInputElement>;
-    const clearBtn = document.getElementById('clear-filters');
-    
-    // Pagination State
-    let currentPage = 1;
-    let pageSizeSelect = document.getElementById('page-size') as HTMLSelectElement;
-    let itemsPerPage = parseInt(pageSizeSelect?.value || '12', 10);
-    
-    const prevBtn = document.getElementById('prev-page') as HTMLButtonElement;
-    const nextBtn = document.getElementById('next-page') as HTMLButtonElement;
-    const pageNumbersContainer = document.getElementById('page-numbers');
-    const paginationContainer = document.getElementById('pagination-container');
-    
-    function changePage(newPage: number) {
-      if (newPage === currentPage) return;
-      const grid = document.querySelector('.events-grid') as HTMLElement;
-      
-      // Smooth fade out
-      if (grid) grid.style.opacity = '0';
-      
-      setTimeout(() => {
-        currentPage = newPage;
-        applyFilters(false);
-        
-        // Scroll exactly to search container with header offset
-        const searchContainer = document.getElementById('global-search')?.closest('.mb-10');
-        if (searchContainer) {
-          const y = searchContainer.getBoundingClientRect().top + window.scrollY - 100; 
-          window.scrollTo({ top: y, behavior: 'smooth' });
-        }
-        
-        // Smooth fade in
-        if (grid) grid.style.opacity = '1';
-      }, 300); // Waits for the opacity transition
+    const params = new URLSearchParams(location.search);
+    const inputs = document.querySelectorAll<HTMLInputElement>('.filter-input');
+    inputs.forEach(input => { input.checked = params.getAll(input.name).includes(input.value); });
+    const search = document.querySelector<HTMLInputElement>('#global-search');
+    if (search) search.value = params.get('q') || '';
+    document.querySelector('#clear-search')?.classList.toggle('hidden', !search?.value);
+    if (params.get('virtual') === 'true') {
+      const virtual = document.querySelector<HTMLInputElement>('input[name="modality"][value="virtual"]');
+      if (virtual) virtual.checked = true;
     }
-
-    function applyFilters(resetPage = false) {
-      if (resetPage) currentPage = 1;
-      
-      const selectedCities = Array.from(document.querySelectorAll('input[name="city"]:checked')).map(el => (el as HTMLInputElement).value);
-      const selectedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked')).map(el => (el as HTMLInputElement).value);
-      const selectedSources = Array.from(document.querySelectorAll('input[name="source"]:checked')).map(el => (el as HTMLInputElement).value);
-      const selectedTopics = Array.from(document.querySelectorAll('input[name="topic"]:checked')).map(el => (el as HTMLInputElement).value);
-      const selectedModalities = Array.from(document.querySelectorAll('input[name="modality"]:checked')).map(el => (el as HTMLInputElement).value);
-      const selectedCosts = Array.from(document.querySelectorAll('input[name="cost"]:checked')).map(el => (el as HTMLInputElement).value);
-      
-      const dateFilterEl = document.querySelector('input[name="date"]:checked') as HTMLInputElement;
-      const selectedDate = dateFilterEl ? dateFilterEl.value : null;
-
-      const searchInput = document.getElementById('global-search') as HTMLInputElement;
-      const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
-      const clearSearchBtn = document.getElementById('clear-search');
-
-      if (clearSearchBtn) {
-        if (searchVal.length > 0) clearSearchBtn.classList.remove('hidden');
-        else clearSearchBtn.classList.add('hidden');
-      }
-
-      const hasFilters = selectedCities.length || selectedCategories.length || selectedSources.length || selectedTopics.length || selectedModalities.length || selectedCosts.length || selectedDate || searchVal.length > 0;
-      if (clearBtn) {
-        if (hasFilters) clearBtn.classList.remove('hidden');
-        else clearBtn.classList.add('hidden');
-      }
-
-      const wrappers = document.querySelectorAll('.event-wrapper') as NodeListOf<HTMLElement>;
-      let filteredElements: HTMLElement[] = [];
-
-      const now = new Date();
-      const currentMonth = now.getMonth();
-      const currentYear = now.getFullYear();
-
-      wrappers.forEach(wrapper => {
-        const city = wrapper.dataset.city || '';
-        const category = wrapper.dataset.category || '';
-        const source = wrapper.dataset.source || '';
-        const searchableText = (wrapper.dataset.search || '').toLowerCase();
-        
-        const modality = wrapper.dataset.modality || '';
-        const cost = wrapper.dataset.cost || '';
-        const timestamp = parseInt(wrapper.dataset.date || '0', 10);
-        const eventDate = new Date(timestamp);
-        
-        let matchCity = selectedCities.length === 0 || selectedCities.includes(city) || (city === 'Virtual' && selectedCities.includes('Virtual'));
-        let matchCategory = selectedCategories.length === 0 || selectedCategories.includes(category);
-        
-        let matchSource = selectedSources.length === 0 || selectedSources.some(s => source.includes(s) || searchableText.includes(s.toLowerCase()));
-        let matchTopic = selectedTopics.length === 0 || selectedTopics.some(t => searchableText.includes(t.toLowerCase()));
-
-        let matchModality = selectedModalities.length === 0 || selectedModalities.includes(modality);
-        let matchCost = selectedCosts.length === 0 || selectedCosts.includes(cost);
-        
-        let matchDate = true;
-        if (selectedDate === 'this-month') {
-          matchDate = eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear;
-        } else if (selectedDate === 'next-month') {
-          const nextMonth = (currentMonth + 1) % 12;
-          const targetYear = nextMonth === 0 ? currentYear + 1 : currentYear;
-          matchDate = eventDate.getMonth() === nextMonth && eventDate.getFullYear() === targetYear;
-        } else if (selectedDate === 'next-3-months') {
-          const threeMonthsFromNow = new Date(now);
-          threeMonthsFromNow.setMonth(now.getMonth() + 3);
-          matchDate = eventDate >= now && eventDate <= threeMonthsFromNow;
-        }
-
-        const matchSearch = searchVal === '' || searchableText.includes(searchVal);
-
-        if (matchCity && matchCategory && matchSource && matchTopic && matchModality && matchCost && matchDate && matchSearch) {
-          filteredElements.push(wrapper);
-        } else {
-          wrapper.style.display = 'none';
-          wrapper.style.opacity = '0';
-          wrapper.style.transform = 'scale(0.95)';
-        }
-      });
-      
-      const totalItems = filteredElements.length;
-      const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-      
-      // Asegurar que currentPage no exceda el máximo
-      if (currentPage > totalPages) currentPage = totalPages;
-      
-      const startIndex = (currentPage - 1) * itemsPerPage;
-      const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-      
-      // Mostrar solo los elementos de la página actual
-      filteredElements.forEach((wrapper, index) => {
-        if (index >= startIndex && index < endIndex) {
-          if (wrapper.style.display === 'none') {
-             wrapper.style.display = 'block';
-             requestAnimationFrame(() => {
-               wrapper.style.opacity = '1';
-               wrapper.style.transform = 'scale(1)';
-             });
-          }
-        } else {
-          wrapper.style.display = 'none';
-          wrapper.style.opacity = '0';
-          wrapper.style.transform = 'scale(0.95)';
-        }
-      });
-
-      // Update Pagination UI
-      if (paginationContainer) {
-        paginationContainer.style.display = totalItems > 0 ? 'flex' : 'none';
-      }
-      
-      if (prevBtn && nextBtn && pageNumbersContainer) {
-        prevBtn.disabled = currentPage === 1;
-        nextBtn.disabled = currentPage === totalPages;
-        
-        pageNumbersContainer.innerHTML = '';
-        
-        const createBtn = (num: number, text = num.toString()) => {
-          const btn = document.createElement('button');
-          btn.textContent = text;
-          btn.className = `px-3 py-1 rounded-md text-sm font-medium transition-colors duration-300 ${num === currentPage ? 'bg-[var(--color-sim-action)] text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`;
-          btn.onclick = () => changePage(num);
-          return btn;
-        };
-        
-        const createEllipsis = () => {
-          const span = document.createElement('span');
-          span.textContent = '...';
-          span.className = 'px-2 text-gray-500 font-medium select-none';
-          return span;
-        };
-
-        // Lógica de Paginación en Bloques de 5 (Group-based pagination)
-        const PAGES_PER_GROUP = 5;
-        const currentGroup = Math.ceil(currentPage / PAGES_PER_GROUP);
-        const start = (currentGroup - 1) * PAGES_PER_GROUP + 1;
-        const end = Math.min(start + PAGES_PER_GROUP - 1, totalPages);
-
-        if (start > 1) {
-          pageNumbersContainer.appendChild(createBtn(1));
-          pageNumbersContainer.appendChild(createEllipsis());
-        }
-
-        for (let i = start; i <= end; i++) {
-          pageNumbersContainer.appendChild(createBtn(i));
-        }
-
-        if (end < totalPages) {
-          pageNumbersContainer.appendChild(createEllipsis());
-          pageNumbersContainer.appendChild(createBtn(totalPages));
-        }
-      }
-
-      document.dispatchEvent(new CustomEvent('filters:changed', { detail: { count: totalItems } }));
+    if (params.get('free') === 'true') {
+      const free = document.querySelector<HTMLInputElement>('input[name="cost"][value="free"]');
+      if (free) free.checked = true;
     }
-
-    let debounceTimer: ReturnType<typeof setTimeout>;
-    function debouncedApplyFilters(resetPage = false) {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        requestAnimationFrame(() => applyFilters(resetPage));
-      }, 150);
+    function apply() {
+      const query = new URLSearchParams();
+      inputs.forEach(input => { if (input.checked) query.append(input.name, input.value); });
+      if (search?.value.trim()) query.set('q', search.value.trim().slice(0, 100));
+      const size = document.querySelector<HTMLSelectElement>('#page-size')?.value;
+      if (size && size !== '12') query.set('size', size);
+      query.sort();
+      location.assign(location.pathname + (query.size ? '?' + query.toString() : ''));
     }
-
-    inputs.forEach(input => {
-      input.addEventListener('change', () => debouncedApplyFilters(true));
+    document.querySelector('#apply-filters')?.addEventListener('click', apply);
+    search?.addEventListener('keydown', event => { if (event.key === 'Enter') apply(); });
+    document.querySelector('#clear-search')?.addEventListener('click', () => { if (search) search.value = ''; apply(); });
+    document.querySelector('#clear-filters')?.classList.toggle('hidden', !params.size);
+    document.querySelector('#clear-filters')?.addEventListener('click', () => location.assign(location.pathname));
+    document.querySelector('#page-size')?.addEventListener('change', apply);
+    document.querySelector('#prev-page')?.addEventListener('click', () => {
+      const previous = sessionStorage.getItem('catalogPrevious');
+      if (previous?.startsWith(location.pathname + '?') || previous === location.pathname) location.assign(previous);
+      else { params.delete('cursor'); location.assign(location.pathname + '?' + params.toString()); }
     });
-
-    const globalSearch = document.getElementById('global-search');
-    if (globalSearch) {
-      globalSearch.addEventListener('input', () => debouncedApplyFilters(true));
-    }
-    
-    if (pageSizeSelect) {
-      pageSizeSelect.addEventListener('change', (e) => {
-        itemsPerPage = parseInt((e.target as HTMLSelectElement).value, 10);
-        debouncedApplyFilters(true);
-      });
-    }
-    
-    if (prevBtn) {
-      prevBtn.addEventListener('click', () => {
-        if (currentPage > 1) changePage(currentPage - 1);
-      });
-    }
-    
-    if (nextBtn) {
-      nextBtn.addEventListener('click', () => {
-        if (currentPage < totalPages) changePage(currentPage + 1);
-      });
-    }
-    
-    const clearSearchBtn = document.getElementById('clear-search');
-    if (clearSearchBtn && globalSearch) {
-      clearSearchBtn.addEventListener('click', () => {
-        (globalSearch as HTMLInputElement).value = '';
-        debouncedApplyFilters(true);
-      });
-    }
-
-    if (clearBtn) {
-      clearBtn.addEventListener('click', () => {
-        inputs.forEach(input => {
-          if (input.type === 'radio' || input.type === 'checkbox') input.checked = false;
-        });
-        if (globalSearch) (globalSearch as HTMLInputElement).value = '';
-        debouncedApplyFilters(true);
-      });
-    }
-    
-    // Call on load to setup initial pagination
-    applyFilters(true);
+    document.querySelector<HTMLElement>('#next-page')?.addEventListener('click', event => {
+      const url = (event.currentTarget as HTMLElement).dataset.nextUrl;
+      if (url) { sessionStorage.setItem('catalogPrevious', location.pathname + location.search); location.assign(url); }
+    });
   });
 </script>

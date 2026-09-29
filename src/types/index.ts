@@ -16,6 +16,7 @@ export interface EventDate {
 }
 
 export interface TechEvent {
+  kind?: "EVENT" | "COURSE";
   id?: string;
   externalId?: string;
   title: string;
@@ -29,7 +30,7 @@ export interface TechEvent {
   date: EventDate;
   timeString?: string;
   imageUrl?: string;
-  isLive: boolean; 
+  isLive: boolean;
   isFree: boolean;
   price?: string;
   organizer?: string;

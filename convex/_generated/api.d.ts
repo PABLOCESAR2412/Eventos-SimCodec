@@ -9,18 +9,13 @@
  */
 
 import type * as actions from "../actions.js";
-import type * as addEkos from "../addEkos.js";
-import type * as clean from "../clean.js";
-import type * as clear from "../clear.js";
 import type * as crons from "../crons.js";
 import type * as events from "../events.js";
-import type * as fixnan from "../fixnan.js";
-import type * as providers_CourseraProvider from "../providers/CourseraProvider.js";
-import type * as providers_DevpostProvider from "../providers/DevpostProvider.js";
-import type * as providers_EventbriteProvider from "../providers/EventbriteProvider.js";
-import type * as providers_GenericRssProvider from "../providers/GenericRssProvider.js";
-import type * as providers_LumaProvider from "../providers/LumaProvider.js";
-import type * as providers_Provider from "../providers/Provider.js";
+import type * as lib_http from "../lib/http.js";
+import type * as lib_model from "../lib/model.js";
+import type * as lib_parsers from "../lib/parsers.js";
+import type * as maintenance from "../maintenance.js";
+import type * as sources from "../sources.js";
 
 import type {
   ApiFromModules,
@@ -30,18 +25,13 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   actions: typeof actions;
-  addEkos: typeof addEkos;
-  clean: typeof clean;
-  clear: typeof clear;
   crons: typeof crons;
   events: typeof events;
-  fixnan: typeof fixnan;
-  "providers/CourseraProvider": typeof providers_CourseraProvider;
-  "providers/DevpostProvider": typeof providers_DevpostProvider;
-  "providers/EventbriteProvider": typeof providers_EventbriteProvider;
-  "providers/GenericRssProvider": typeof providers_GenericRssProvider;
-  "providers/LumaProvider": typeof providers_LumaProvider;
-  "providers/Provider": typeof providers_Provider;
+  "lib/http": typeof lib_http;
+  "lib/model": typeof lib_model;
+  "lib/parsers": typeof lib_parsers;
+  maintenance: typeof maintenance;
+  sources: typeof sources;
 }>;
 
 /**

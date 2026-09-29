@@ -28,3 +28,9 @@ pnpm-debug.log*
 .agents/
 AGENTS.md
 CLAUDE.md
+.vercel/
+.backups/
+.admin-credentials.txt
+.vercel
+
+.vercel

@@ -1,13 +1,7 @@
 import { ConvexHttpClient } from "convex/browser";
-
-const client = new ConvexHttpClient(process.env.VITE_CONVEX_URL || process.env.CONVEX_URL!);
-
-async function main() {
-  const allEvents = await client.query("events:getAllEventsAdmin" as any);
-  console.log("Total events in DB (Admin):", allEvents.length);
-  
-  const activeEvents = await client.query("events:getActiveEvents" as any, {});
-  console.log("Active events returned to frontend:", activeEvents.length);
-}
-
-main().catch(console.error);
+import { api } from "./convex/_generated/api";
+const url = process.env.CONVEX_URL || process.env.PUBLIC_CONVEX_URL;
+if (!url) throw new Error("CONVEX_URL is required");
+const client = new ConvexHttpClient(url);
+const events = await client.query(api.events.getCatalogPage, { paginationOpts: { cursor: null, numItems: 12 } });
+console.log("Active events on first page:", events.page.length, "More pages:", !events.isDone);
