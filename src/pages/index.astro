@@ -7,6 +7,19 @@ import { api } from '../../convex/_generated/api';
 import { catalogArgs } from '../lib/catalog';
 Astro.response.headers.set('Cache-Control', 'public, max-age=0, s-maxage=300, stale-while-revalidate=600');
 const args = catalogArgs(Astro.url.searchParams);
+const isCourseView = args.kind === 'COURSE';
+const viewUrl = (courses: boolean) => {
+  const url = new URL(Astro.url);
+  url.searchParams.delete('cursor');
+  if (courses) {
+    url.searchParams.set('view', 'courses');
+    url.searchParams.delete('date');
+  } else {
+    url.searchParams.delete('view');
+  }
+  url.searchParams.sort();
+  return url.pathname + url.search;
+};
 let result;
 try { result = await convex.query(api.events.getCatalogPage, args); }
 catch {
@@ -52,7 +65,15 @@ const nextUrl = new URL(Astro.url); nextUrl.searchParams.set('cursor', result.co
   <main class="max-w-[90rem] mx-auto px-6 lg:px-12 py-12 flex flex-col lg:flex-row gap-10">
     <Sidebar />
 
-    <div class="flex-grow">
+    <div class="flex-grow min-w-0">
+      <nav aria-label="Tipo de contenido" class="flex flex-wrap gap-x-6 gap-y-2 border-b border-[var(--border-color)] mb-6">
+        <a href={viewUrl(false)} aria-current={!isCourseView ? 'page' : undefined} class:list={['min-h-11 py-3 border-b-2 text-sm sm:text-base font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-sim-action)]', !isCourseView ? 'border-[var(--color-sim-action)] text-blue-700 dark:text-blue-300' : 'border-transparent text-[var(--text-color)] hover:border-[var(--border-color)]']}>
+          Eventos con fecha
+        </a>
+        <a href={viewUrl(true)} aria-current={isCourseView ? 'page' : undefined} class:list={['min-h-11 py-3 border-b-2 text-sm sm:text-base font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-sim-action)]', isCourseView ? 'border-[var(--color-sim-action)] text-blue-700 dark:text-blue-300' : 'border-transparent text-[var(--text-color)] hover:border-[var(--border-color)]']}>
+          Cursos a tu ritmo
+        </a>
+      </nav>
       <!-- Barra de Búsqueda Dinámica -->
       <div class="mb-10 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm transition-colors duration-300">
         <div class="w-full relative flex items-center bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-800 rounded-xl focus-within:border-[var(--color-sim-action)] focus-within:ring-4 focus-within:ring-[var(--color-sim-action)]/20 transition-all duration-300 p-1.5">
@@ -60,8 +81,9 @@ const nextUrl = new URL(Astro.url); nextUrl.searchParams.set('cursor', result.co
           <input
             type="text"
             id="global-search"
-            placeholder="Busca eventos y pulsa Enter" value={args.searchTerm}
-            class="flex-1 bg-transparent border-none outline-none px-4 py-2.5 text-gray-900 dark:text-white placeholder-gray-500 text-base font-medium transition-colors duration-300"
+            aria-label={isCourseView ? 'Buscar cursos' : 'Buscar eventos'}
+            placeholder={isCourseView ? 'Busca cursos y pulsa Enter' : 'Busca eventos y pulsa Enter'} value={args.searchTerm}
+            class="flex-1 min-w-0 bg-transparent border-none outline-none px-4 py-2.5 text-gray-900 dark:text-white placeholder-gray-500 text-base font-medium transition-colors duration-300"
           />
           <button id="clear-search" class="hidden bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white font-bold py-2.5 px-4 rounded-lg transition-colors duration-200 uppercase text-xs tracking-wider">
             Borrar
@@ -70,7 +92,7 @@ const nextUrl = new URL(Astro.url); nextUrl.searchParams.set('cursor', result.co
       </div>
 
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
-        <h2 class="text-2xl font-bold text-[var(--text-color)] transition-colors duration-300">Próximos Eventos y Cursos</h2>
+        <h2 class="text-2xl font-bold text-[var(--text-color)] transition-colors duration-300">{isCourseView ? 'Cursos a tu ritmo' : 'Eventos con fecha'}</h2>
         <span id="results-count" class="text-sm font-medium text-gray-700 dark:text-gray-400 bg-gray-200 dark:bg-gray-800 px-3 py-1 rounded-full border border-gray-300 dark:border-[var(--border-color)] transition-colors duration-300" data-template="Mostrando {count} resultados en esta página">
           Mostrando {events.length} resultados
         </span>
@@ -124,16 +146,18 @@ const nextUrl = new URL(Astro.url); nextUrl.searchParams.set('cursor', result.co
     </div>
 
     <!-- Modal Component -->
-    <div id="event-modal" class="fixed inset-0 z-[200] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
-      <div id="modal-backdrop" class="absolute inset-0 bg-black/50 dark:bg-black/80 backdrop-blur-sm cursor-pointer transition-colors duration-300"></div>
-      <div class="relative bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl transform scale-95 transition-all duration-300" id="modal-content">
-        <div id="modal-image-container" class="relative h-64 bg-gray-100 dark:bg-gray-800 transition-colors duration-300">
-          <img id="modal-img" src="" alt="Imagen del evento" class="w-full h-full object-cover" />
-          <button id="close-modal" class="absolute top-4 right-4 bg-white/80 dark:bg-black/50 text-gray-800 dark:text-white hover:bg-white dark:hover:bg-black/80 p-2 rounded-full backdrop-blur-sm transition-colors z-10" aria-label="Cerrar modal">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    <dialog id="event-modal" aria-labelledby="modal-title" data-lenis-prevent class="fixed inset-0 items-center justify-center p-4 text-[var(--text-color)]">
+      <div id="modal-backdrop" aria-hidden="true" class="absolute inset-0 bg-black/50 dark:bg-black/80 backdrop-blur-sm cursor-pointer transition-colors duration-300"></div>
+      <div class="relative bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl w-full max-w-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain shadow-2xl" id="modal-content">
+        <div class="sticky top-0 z-10 flex justify-end h-0">
+          <button id="close-modal" type="button" autofocus class="relative top-4 right-4 min-w-11 min-h-11 flex items-center justify-center bg-white/90 dark:bg-black/80 text-gray-800 dark:text-white hover:bg-white dark:hover:bg-black p-2 rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-sim-action)]" aria-label="Cerrar detalles">
+            <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
         </div>
-        <div class="p-8">
+        <div id="modal-image-container" class="relative h-64 bg-gray-100 dark:bg-gray-800 transition-colors duration-300">
+          <img id="modal-img" src="/loading_logo_dark.png" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover" />
+        </div>
+        <div id="modal-details" class="p-6 sm:p-8">
           <div class="flex gap-3 mb-4">
             <span id="modal-city" class="text-xs font-semibold uppercase text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-400/10 px-2.5 py-1 rounded-md border border-blue-200 dark:border-transparent"></span>
             <span id="modal-price" class="text-xs font-semibold uppercase px-2.5 py-1 rounded-md"></span>
@@ -160,33 +184,11 @@ const nextUrl = new URL(Astro.url); nextUrl.searchParams.set('cursor', result.co
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   </main>
 
   <script>
-    import { gsap } from 'gsap';
-    import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
     document.addEventListener('DOMContentLoaded', () => {
-      // Animación de entrada general unificada y prolija
-      const tl = gsap.timeline({
-        defaults: { ease: 'power3.out', duration: 0.8 },
-        delay: 0.2 // Pequeño delay para dejar que la pantalla de carga se oculte suavemente
-      });
-
-      tl.from('header', { y: -30, opacity: 0 })
-        .from('aside', { x: -30, opacity: 0, duration: 0.6 }, '-=0.4')
-        .from('.flex-grow', { y: 30, opacity: 0, duration: 0.6 }, '-=0.4')
-        .from('.events-grid', {
-          y: 30,
-          opacity: 0,
-          duration: 0.6,
-          clearProps: 'opacity,transform',
-          onComplete: () => {
-            ScrollTrigger.refresh();
-          }
-        }, '-=0.2');
-
       // Contador
       document.addEventListener('filters:changed', (e: any) => {
         const countEl = document.getElementById('results-count');
@@ -197,15 +199,17 @@ const nextUrl = new URL(Astro.url); nextUrl.searchParams.set('cursor', result.co
       });
 
       // Modal Logic
-      const modal = document.getElementById('event-modal');
+      const modal = document.querySelector<HTMLDialogElement>('#event-modal');
       const modalBackdrop = document.getElementById('modal-backdrop');
       const closeModalBtn = document.getElementById('close-modal');
       const modalContent = document.getElementById('modal-content');
+      let opener: HTMLElement | null = null;
+      let previousOverflow = '';
 
       const openModal = (btn: HTMLElement) => {
-        if (!modal || !modalContent) return;
+        if (!modal || !modalContent || modal.open) return;
 
-        const { title, desc, url, image, city, price, date, category, subcategory } = btn.dataset;
+        const { title, desc, url, image, city, price, date, category } = btn.dataset;
 
         document.getElementById('modal-title')!.textContent = title || '';
         document.getElementById('modal-desc')!.textContent = desc || '';
@@ -258,34 +262,55 @@ const nextUrl = new URL(Astro.url); nextUrl.searchParams.set('cursor', result.co
         const priceEl = document.getElementById('modal-price')!;
         priceEl.textContent = price || '';
         if (price === 'GRATIS' || price === 'FREE') {
-          priceEl.className = 'text-xs font-semibold uppercase text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded-md';
+          priceEl.className = 'text-xs font-semibold uppercase text-emerald-700 dark:text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded-md';
         } else {
-          priceEl.className = 'text-xs font-semibold uppercase text-blue-400 bg-blue-400/10 px-2.5 py-1 rounded-md';
+          priceEl.className = 'text-xs font-semibold uppercase text-blue-700 dark:text-blue-400 bg-blue-400/10 px-2.5 py-1 rounded-md';
         }
 
         const imgContainer = document.getElementById('modal-image-container')!;
+        document.getElementById('modal-details')?.toggleAttribute('data-without-image', !image);
         if (image) {
           imgContainer.style.display = 'block';
-          (document.getElementById('modal-img') as HTMLImageElement).src = image;
+          const img = document.getElementById('modal-img') as HTMLImageElement;
+          img.src = image;
+          img.alt = title || 'Imagen del evento';
         } else {
           imgContainer.style.display = 'none';
         }
 
         (document.getElementById('modal-link') as HTMLAnchorElement).href = url || '#';
 
-        modal.classList.remove('opacity-0', 'pointer-events-none');
-        modalContent.classList.remove('scale-95');
-        modalContent.classList.add('scale-100');
+        opener = btn;
+        previousOverflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
+        modal.showModal();
+        modalContent.scrollTop = 0;
+        closeModalBtn?.focus({ preventScroll: true });
       };
 
       const closeModal = () => {
-        if (!modal || !modalContent) return;
-        modal.classList.add('opacity-0', 'pointer-events-none');
-        modalContent.classList.remove('scale-100');
-        modalContent.classList.add('scale-95');
-        document.body.style.overflow = '';
+        if (modal?.open) modal.close();
       };
+
+      modal?.addEventListener('cancel', event => {
+        event.preventDefault();
+        closeModal();
+      });
+      modal?.addEventListener('close', () => {
+        document.body.style.overflow = previousOverflow;
+        if (opener?.isConnected) opener.focus({ preventScroll: true });
+        opener = null;
+      });
+      modal?.addEventListener('keydown', event => {
+        if (event.key !== 'Tab') return;
+        const controls = [...modal.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]')].filter(control => control.getClientRects().length > 0);
+        const first = controls[0];
+        const last = controls[controls.length - 1];
+        if (first && last && (event.shiftKey ? document.activeElement === first : document.activeElement === last)) {
+          event.preventDefault();
+          (event.shiftKey ? last : first).focus();
+        }
+      });
 
       document.querySelectorAll('.open-modal-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -300,6 +325,28 @@ const nextUrl = new URL(Astro.url); nextUrl.searchParams.set('cursor', result.co
   </script>
 
   <style>
+    #event-modal {
+      display: none;
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      max-height: none;
+      border: 0;
+      background: transparent;
+    }
+    #event-modal[open] {
+      display: flex;
+    }
+    #event-modal::backdrop {
+      background: transparent;
+    }
+    #modal-details {
+      overflow-wrap: anywhere;
+    }
+    #modal-details[data-without-image] {
+      padding-top: 5rem;
+    }
     .event-wrapper {
       transition: opacity 0.25s ease-out, transform 0.25s ease-out;
       will-change: opacity, transform;

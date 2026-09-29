@@ -13,8 +13,10 @@ const { event } = Astro.props;
 
   <button
     type="button"
-    class="open-modal-btn absolute inset-0 z-20 focus:outline-none focus:ring-2 focus:ring-[var(--color-sim-action)] rounded-lg cursor-pointer w-full h-full opacity-0"
-    aria-label={`${event.title}`}
+    class="open-modal-btn absolute inset-0 z-20 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-sim-action)] rounded-lg cursor-pointer w-full h-full"
+    aria-label={`Ver detalles de ${event.title}`}
+    aria-haspopup="dialog"
+    aria-controls="event-modal"
     data-title={event.title}
     data-desc={event.description || 'Los detalles extendidos no se encuentran disponibles para este evento. Visite la página oficial mediante el botón de registro para obtener toda la información, cronogramas y requerimientos específicos.'}
     data-url={event.url}
@@ -101,12 +103,12 @@ const { event } = Astro.props;
       </div>
 
       <!-- Modal Trigger Button -->
-      <button
-        class="open-modal-btn text-[var(--color-sim-action)] hover:text-blue-800 dark:hover:text-blue-400 p-1.5 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors pointer-events-none"
-        aria-label="Ver detalles"
+      <span
+        class="text-[var(--color-sim-action)] p-1.5 rounded-md pointer-events-none"
+        aria-hidden="true"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-      </button>
+      </span>
     </div>
   </div>
 </article>

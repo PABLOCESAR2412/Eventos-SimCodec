@@ -6,6 +6,7 @@ import { BATCH_SIZE, DAY, eventInput, eventFields, normalizeEvent, sameContent, 
 import type { Doc, DataModel } from "./_generated/dataModel";
 const strings = v.optional(v.array(v.string()));
 const filters = { searchTerm: v.optional(v.string()), categories: strings, cities: strings,
+  kind: v.optional(v.union(v.literal("EVENT"), v.literal("COURSE"))),
   sources: strings, topics: strings, modalities: strings, costs: strings,
   dateFrom: v.optional(v.number()), dateTo: v.optional(v.number()) };
 function publicEvent(e: Doc<"events">) {
@@ -23,7 +24,8 @@ export const getCatalogPage = query({
     if ((args.searchTerm?.length ?? 0) > 100 || (args.paginationOpts.cursor?.length ?? 0) > 4096) throw new Error("Invalid search");
     const matches = (e: Doc<"events">) => {
       const text = e.searchText ?? (e.title + " " + e.description + " " + e.category + " " + (e.subcategory ?? "") + " " + e.source).toLowerCase();
-      return (!args.categories?.length || args.categories.includes(e.category)) &&
+      return (args.kind === undefined || (args.kind === "COURSE" ? e.kind === "COURSE" : e.kind !== "COURSE" && e.dateStart > 0)) &&
+        (!args.categories?.length || args.categories.includes(e.category)) &&
         (!args.cities?.length || args.cities.includes(e.isVirtual ? "Virtual" : e.city ?? "")) &&
         (!args.sources?.length || args.sources.some(s => e.source.includes(s))) &&
         (!args.topics?.length || args.topics.some(s => text.includes(s.toLowerCase()))) &&
@@ -34,8 +36,12 @@ export const getCatalogPage = query({
     };
     const options = { cursor: args.paginationOpts.cursor, numItems: Math.max(1, Math.min(48, Math.floor(args.paginationOpts.numItems))),
       maximumRowsRead: 256, maximumBytesRead: 600_000 };
+    const contentFilter = (q: FilterBuilder<DataModel["events"]>) => args.kind === "COURSE"
+      ? q.eq(q.field("kind"), "COURSE")
+      : args.kind === "EVENT" ? q.and(q.neq(q.field("kind"), "COURSE"), q.gt(q.field("dateStart"), 0)) : true;
     const databaseFilters = (q: FilterBuilder<DataModel["events"]>) => q.and(
-      ...[args.categories?.length ? q.or(...args.categories.map(c => q.eq(q.field("category"), c))) : undefined,
+      ...[contentFilter(q),
+        args.categories?.length ? q.or(...args.categories.map(c => q.eq(q.field("category"), c))) : undefined,
         args.cities?.length ? q.or(...args.cities.map(c => c === "Virtual" ? q.eq(q.field("isVirtual"), true) : q.and(q.eq(q.field("isVirtual"), false), q.eq(q.field("city"), c)))) : undefined,
         args.sources?.length ? q.or(...args.sources.map(s => q.eq(q.field("source"), s))) : undefined,
         args.modalities?.length === 1 ? q.eq(q.field("isVirtual"), args.modalities[0] === "virtual") : undefined,
@@ -45,10 +51,16 @@ export const getCatalogPage = query({
       ].filter((expression): expression is NonNullable<typeof expression> => expression !== undefined)
     );
     const result = args.searchTerm?.trim()
-      ? await ctx.db.query("events").withSearchIndex("search_catalog", q => q.search("searchText", args.searchTerm!.trim()).eq("status", "PUBLISHED").eq("isLinkValid", true)).paginate(options)
+      ? await ctx.db.query("events").withSearchIndex("search_catalog", q => q.search("searchText", args.searchTerm!.trim()).eq("status", "PUBLISHED").eq("isLinkValid", true)).filter(contentFilter).paginate(options)
       : args.categories?.length === 1
-        ? await ctx.db.query("events").withIndex("by_catalog_category", q => q.eq("status", "PUBLISHED").eq("isLinkValid", true).eq("category", args.categories![0])).filter(databaseFilters).paginate(options)
-        : await ctx.db.query("events").withIndex("by_catalog", q => q.eq("status", "PUBLISHED").eq("isLinkValid", true)).filter(databaseFilters).paginate(options);
+        ? await ctx.db.query("events").withIndex("by_catalog_category", q => {
+          const range = q.eq("status", "PUBLISHED").eq("isLinkValid", true).eq("category", args.categories![0]);
+          return args.kind === "EVENT" ? range.gt("dateStart", 0) : range;
+        }).filter(databaseFilters).paginate(options)
+        : await ctx.db.query("events").withIndex("by_catalog", q => {
+          const range = q.eq("status", "PUBLISHED").eq("isLinkValid", true);
+          return args.kind === "EVENT" ? range.gt("dateStart", 0) : range;
+        }).filter(databaseFilters).paginate(options);
     return { ...result, page: result.page.filter(matches).map(publicEvent) };
   },
 });

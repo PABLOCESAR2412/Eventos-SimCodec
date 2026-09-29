@@ -62,31 +62,7 @@ const { title, description } = Astro.props;
       })();
     </script>
   </head>
-  <body class="bg-[var(--bg-color)] text-[var(--text-color)] font-sans antialiased selection:bg-[var(--color-sim-action)] selection:text-white transition-colors duration-300 overflow-hidden">
-    
-    <!-- Pantalla de Carga Inicial -->
-    <div id="initial-loader" class="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-[var(--bg-color)] transition-all duration-700">
-      <div class="relative w-56 flex flex-col items-center">
-        <!-- Logo con animación de respiración -->
-        <img src="/loading_logo_dark.png" alt="Cargando SimCodec..." class="w-full h-auto animate-pulse block dark:hidden" />
-        <img src="/loading_logo.png" alt="Cargando SimCodec..." class="w-full h-auto animate-pulse hidden dark:block" />
-        <!-- Barra de progreso indeterminada -->
-        <div class="mt-8 w-32 h-1 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-          <div class="h-full bg-[var(--color-sim-brand)] rounded-full loader-bar"></div>
-        </div>
-      </div>
-    </div>
-    <style>
-      .loader-bar {
-        animation: loadingBar 1.5s ease-in-out infinite;
-        transform-origin: left;
-      }
-      @keyframes loadingBar {
-        0% { transform: translateX(-100%); width: 100%; }
-        50% { transform: translateX(0); width: 50%; }
-        100% { transform: translateX(200%); width: 100%; }
-      }
-    </style>
+  <body class="bg-[var(--bg-color)] text-[var(--text-color)] font-sans antialiased selection:bg-[var(--color-sim-action)] selection:text-white transition-colors duration-300">
 
     <!-- Background Pattern -->
     <div class="fixed inset-0 pointer-events-none z-[-1] opacity-40 dark:opacity-20 transition-opacity duration-300">
@@ -127,24 +103,6 @@ const { title, description } = Astro.props;
       lenis.on('scroll', ScrollTrigger.update);
       gsap.ticker.add((time) => lenis.raf(time * 1000));
       gsap.ticker.lagSmoothing(0);
-
-      // Loading Screen Logic
-      const hideLoader = () => {
-        const loader = document.getElementById('initial-loader');
-        if (loader) {
-          loader.style.opacity = '0';
-          loader.style.visibility = 'hidden';
-          document.body.classList.remove('overflow-hidden'); // Mostrar el scrollbar suavemente
-          setTimeout(() => loader.remove(), 700); // Remover del DOM luego de la transición
-        }
-      };
-
-      // No esperamos a que carguen todas las imágenes (window.load), solo a que el DOM esté listo
-      if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        setTimeout(hideLoader, 600); // 600ms de tiempo mínimo visual
-      } else {
-        document.addEventListener('DOMContentLoaded', () => setTimeout(hideLoader, 600));
-      }
 
       // Theme Toggle Logic
       const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
