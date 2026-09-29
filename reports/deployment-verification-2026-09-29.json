@@ -1,0 +1,58 @@
+{
+  "checkedAt": "2026-09-29T22:32:35.065Z",
+  "commit": "ef9baf544e375a8557a9a791e433b7d6687058ab",
+  "deployment": "dpl_BCdWDUaADhpPGesvFLhFz5Pu8sxt",
+  "url": "https://eventos-sim-codec.vercel.app",
+  "routes": [
+    {
+      "route": "/",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=0",
+      "nosniff": "nosniff",
+      "cards": 12,
+      "frame": "DENY"
+    },
+    {
+      "route": "/en/",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=0",
+      "nosniff": "nosniff",
+      "cards": 12,
+      "frame": "DENY"
+    },
+    {
+      "route": "/?category=Competencias",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=0",
+      "nosniff": "nosniff",
+      "cards": 9,
+      "frame": "DENY"
+    },
+    {
+      "route": "/?q=hackathon",
+      "status": 200,
+      "cache": "MISS",
+      "cacheControl": "public, max-age=0",
+      "nosniff": "nosniff",
+      "cards": 9,
+      "frame": "DENY"
+    },
+    {
+      "route": "/admin",
+      "status": 401,
+      "cache": "MISS",
+      "cacheControl": "private, no-store",
+      "nosniff": "nosniff",
+      "cards": 0,
+      "frame": "DENY"
+    }
+  ],
+  "authenticatedAdmin": {
+    "status": 200,
+    "cacheControl": "private, no-store"
+  },
+  "repeatCache": "HIT"
+}

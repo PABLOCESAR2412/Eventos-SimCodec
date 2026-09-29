@@ -59,3 +59,11 @@ Existen snapshots locales, excluidos de Git:
 - .backups/production-final-with-archives-2026-09-29.zip (incluye File Storage)
 
 El archivo guarda documentos originales con identificadores y metadatos antes de cualquier retirada. La operación comprueba estado y updatedAt antes de retirar cada documento. Los archivos no tienen borrado automático. Revisar restauraciones en un despliegue aislado y conservar otro snapshot actual antes de sustituir producción.
+
+## Despliegue frontend verificado
+
+Código publicado: ef9baf544e375a8557a9a791e433b7d6687058ab. Vercel: dpl_BCdWDUaADhpPGesvFLhFz5Pu8sxt, estado READY, producción en https://eventos-sim-codec.vercel.app.
+
+Las rutas / y /en/ respondieron 200 con 12 tarjetas. Categoría Competencias y búsqueda hackathon respondieron 200 con nueve tarjetas. Una segunda petición a / devolvió x-vercel-cache: HIT. Admin respondió 401 sin credenciales y 200 con credenciales; ambas respuestas administrativas tuvieron Cache-Control: private, no-store.
+
+Ver [comprobación del despliegue](deployment-verification-2026-09-29.json). Las URLs de Convex configuradas en Vercel se comprobaron contra el despliegue de producción esperado.
