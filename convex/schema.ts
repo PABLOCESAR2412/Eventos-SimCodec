@@ -52,11 +52,4 @@ export default defineSchema({
     archivedAt: v.number(),
     status: v.string(),
   }),
-  rateLimits: defineTable({
-    key: v.string(),
-    count: v.number(),
-    resetAt: v.number(),
-  })
-    .index("by_key", ["key"])
-    .index("by_reset", ["resetAt"]),
 });

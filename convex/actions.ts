@@ -114,7 +114,7 @@ export const validateEventLinks = internalAction({
     const invalid = results.length ? await ctx.runMutation(internal.events.recordLinkResults, { results }) : 0;
     await ctx.runMutation(internal.events.recordJob, { taskName: "validateEventLinks", status: results.some(r => r.status <= 0 || r.status >= 400) ? "PARTIAL" : "SUCCESS",
       eventsAdded: 0, eventsUpdated: results.length, eventsSkipped: events.length - results.length, eventsRejected: invalid,
-      durationMs: Date.now() - started, requests, nextRunAt: started + 3_600_000,
+      durationMs: Date.now() - started, requests, nextRunAt: started + 6 * 3_600_000,
       details: results.length + " links checked; " + invalid + " unavailable after repeated 404/410; " + results.filter(r => r.status === -1).length + " destinations require policy review (automatic retry stopped)" });
     return { checked: results.length, invalid };
   },

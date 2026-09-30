@@ -16,7 +16,6 @@ import type * as lib_http from "../lib/http.js";
 import type * as lib_model from "../lib/model.js";
 import type * as lib_parsers from "../lib/parsers.js";
 import type * as maintenance from "../maintenance.js";
-import type * as security from "../security.js";
 import type * as sources from "../sources.js";
 
 import type {
@@ -34,7 +33,6 @@ declare const fullApi: ApiFromModules<{
   "lib/model": typeof lib_model;
   "lib/parsers": typeof lib_parsers;
   maintenance: typeof maintenance;
-  security: typeof security;
   sources: typeof sources;
 }>;
 

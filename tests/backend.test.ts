@@ -8,7 +8,7 @@ import {
   encodeAdminCursor,
 } from "../src/lib/admin-pagination";
 import { repairContracts, repairLegacyLinkHealth } from "../convex/maintenance";
-import { consume } from "../convex/security";
+import { consumeRate } from "../src/lib/rate-limit";
 import {
   createSession,
   hashPassword,
@@ -197,71 +197,17 @@ test("contract migration preserves inverted originals and is idempotent", async 
     repaired: 0,
   });
 });
-test("durable rate limiter rejects sixth login and does not write on rejection", async () => {
-  const old = process.env.CATALOG_TOKEN;
-  process.env.CATALOG_TOKEN = "test-token";
-  const rows = new Map<
-    string,
-    { _id: string; key: string; count: number; resetAt: number }
-  >();
-  let writes = 0;
-  const ctx = {
-    db: {
-      query: () => ({
-        withIndex: (
-          _index: string,
-          build: (q: { eq: (field: string, key: string) => string }) => string,
-        ) => {
-          const key = build({ eq: (_field, key) => key });
-          return { unique: async () => rows.get(key) ?? null };
-        },
-      }),
-      insert: async (
-        _table: string,
-        value: { key: string; count: number; resetAt: number },
-      ) => {
-        writes++;
-        rows.set(value.key, { ...value, _id: value.key });
-      },
-      patch: async (
-        id: string,
-        value: { key: string; count: number; resetAt: number },
-      ) => {
-        writes++;
-        rows.set(id, { ...value, _id: id });
-      },
-    },
-  };
-  try {
-    for (let i = 0; i < 5; i++)
-      expect(
-        await handler(consume)(ctx, {
-          token: "test-token",
-          key: "a".repeat(64),
-          scope: "login",
-        }),
-      ).toMatchObject({ allowed: true });
-    const before = writes;
-    expect(
-      await handler(consume)(ctx, {
-        token: "test-token",
-        key: "a".repeat(64),
-        scope: "login",
-      }),
-    ).toMatchObject({ allowed: false });
-    expect(writes).toBe(before);
-    await rejects(
-      handler(consume)(ctx, {
-        token: "wrong",
-        key: "b".repeat(64),
-        scope: "login",
-      }),
-      /Unauthorized/,
-    );
-  } finally {
-    if (old === undefined) delete process.env.CATALOG_TOKEN;
-    else process.env.CATALOG_TOKEN = old;
-  }
+test("in-memory rate limiter rejects the sixth login and the sixty-first catalog hit", async () => {
+  const ip = "203.0.113.7";
+  for (let i = 0; i < 5; i++)
+    expect(await consumeRate(ip, "login")).toMatchObject({ allowed: true });
+  const sixth = await consumeRate(ip, "login");
+  expect(sixth.allowed).toBe(false);
+  expect(sixth.retryAfter).toBeGreaterThan(0);
+  expect((await consumeRate("198.51.100.9", "login")).allowed).toBe(true);
+  for (let i = 0; i < 60; i++)
+    expect(await consumeRate(ip, "catalog")).toMatchObject({ allowed: true });
+  expect((await consumeRate(ip, "catalog")).allowed).toBe(false);
 });
 test("login verifies password without accepting malformed hashes", () => {
   const hash = hashPassword("strong-test-password");
