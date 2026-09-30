@@ -6,6 +6,14 @@ import {
 } from "node:crypto";
 export const SESSION_COOKIE = "simcodec_admin";
 export const SESSION_SECONDS = 8 * 60 * 60;
+export class LoginInputError extends Error {
+  constructor(
+    message: string,
+    readonly status: 400 | 413 = 400,
+  ) {
+    super(message);
+  }
+}
 function equal(a: string, b: string) {
   const x = Buffer.from(a),
     y = Buffer.from(b);
@@ -66,8 +74,7 @@ export function validSession(
     return (
       p.username === username &&
       Number.isFinite(p.expires) &&
-      p.expires > now &&
-      p.expires <= now + SESSION_SECONDS * 1000
+      p.expires > now
     );
   } catch {
     return false;
@@ -82,7 +89,7 @@ export function sameOriginForm(request: Request, url: URL) {
 }
 export async function readLoginForm(request: Request) {
   const reader = request.body?.getReader();
-  if (!reader) throw new Error("Missing form");
+  if (!reader) throw new LoginInputError("Missing form");
   let bytes = 0,
     body = "";
   const decoder = new TextDecoder();
@@ -93,7 +100,7 @@ export async function readLoginForm(request: Request) {
       bytes += value.byteLength;
       if (bytes > 4096) {
         await reader.cancel();
-        throw new Error("Form too large");
+        throw new LoginInputError("Form too large", 413);
       }
       body += decoder.decode(value, { stream: true });
     }

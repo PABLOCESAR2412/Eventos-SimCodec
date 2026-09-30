@@ -170,7 +170,7 @@ export function formatDate(
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    }).format(date) + " · Ecuador (UTC−5)"
+    }).format(date) + (compact ? " · UTC−5" : " · Ecuador (UTC−5)")
   );
 }
 export interface CatalogEvent extends PriceInfo {

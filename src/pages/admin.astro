@@ -15,9 +15,10 @@ async function loadAdmin() {
 }
 let data: Awaited<ReturnType<typeof loadAdmin>>;
 try { data = await loadAdmin(); }
-catch {
-  Astro.response.status = Astro.url.searchParams.has('cursor') ? 400 : 503;
-  error = Astro.url.searchParams.has('cursor') ? 'La página no es válida. Vuelve al inicio de administración.' : 'No se pudo cargar administración. Intenta de nuevo en un minuto.';
+catch (failure) {
+  const invalid = /InvalidCursor|Invalid cursor/i.test(String(failure));
+  Astro.response.status = invalid ? 400 : 503;
+  error = invalid ? 'La página no es válida. Vuelve al inicio de administración.' : 'No se pudo cargar administración. Intenta de nuevo en un minuto.';
   data = [{ page: [], isDone: true, continueCursor: '' }, []];
 }
 const [result, logs] = data;

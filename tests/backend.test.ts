@@ -1,6 +1,6 @@
 import { rejects } from "node:assert/strict";
 import { expect, test } from "bun:test";
-import { getCatalogPage, recordLinkResults } from "../convex/events";
+import { getCatalogData, recordLinkResults } from "../convex/events";
 import { syncApiSources } from "../convex/actions";
 import { repairContracts, repairLegacyLinkHealth } from "../convex/maintenance";
 import { consume } from "../convex/security";
@@ -115,9 +115,7 @@ test("304 records successful source recovery without writing catalog events", as
   }
 });
 test("catalog uses ordinary bounded index and rejects incomplete candidate sets", async () => {
-  const oldGate = process.env.CATALOG_REQUIRE_TOKEN,
-    oldToken = process.env.CATALOG_TOKEN;
-  process.env.CATALOG_REQUIRE_TOKEN = "true";
+  const oldToken = process.env.CATALOG_TOKEN;
   process.env.CATALOG_TOKEN = "test-token";
   let queries = 0,
     budget: Record<string, unknown> = {};
@@ -138,18 +136,17 @@ test("catalog uses ordinary bounded index and rejects incomplete candidate sets"
   };
   try {
     await rejects(
-      handler(getCatalogPage)(ctx, {
+      handler(getCatalogData)(ctx, {
+        token: "wrong",
         kind: "EVENT",
-        paginationOpts: { cursor: null, numItems: 12 },
       }),
       /Unauthorized/,
     );
     expect(queries).toBe(0);
     await rejects(
-      handler(getCatalogPage)(ctx, {
+      handler(getCatalogData)(ctx, {
         token: "test-token",
         kind: "EVENT",
-        paginationOpts: { cursor: null, numItems: 12 },
       }),
       /CATALOG_CAPACITY/,
     );
@@ -158,8 +155,6 @@ test("catalog uses ordinary bounded index and rejects incomplete candidate sets"
       maximumBytesRead: 600000,
     });
   } finally {
-    if (oldGate === undefined) delete process.env.CATALOG_REQUIRE_TOKEN;
-    else process.env.CATALOG_REQUIRE_TOKEN = oldGate;
     if (oldToken === undefined) delete process.env.CATALOG_TOKEN;
     else process.env.CATALOG_TOKEN = oldToken;
   }

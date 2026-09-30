@@ -3,6 +3,7 @@ export function localeForPath(path: string): Locale {
   return /^\/en(?:\/|$)/.test(path) ? "en" : "es";
 }
 const english: Record<string, string> = {
+  "Horarios de Ecuador (UTC−5).": "Times shown in Ecuador time (UTC−5).",
   "Curso a tu ritmo. Consulta acceso y condiciones en Coursera.":
     "Self-paced course. Check access and conditions on Coursera.",
   "Eventos Tech Ecuador | Comunidad, Meetups y Conferencias":

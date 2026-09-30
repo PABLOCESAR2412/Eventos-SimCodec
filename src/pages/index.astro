@@ -110,6 +110,7 @@ const resetUrl = new URL(Astro.url); resetUrl.searchParams.delete('cursor');
         </span>
       </div>
 
+      {!isCourseView && <p class="mb-6 text-sm text-gray-700 dark:text-gray-300">{t('Horarios de Ecuador (UTC−5).')}</p>}
       {failure && <div role="alert" class="mb-6"><p>{failure}</p><a class="inline-block mt-3 underline underline-offset-4" href={resetUrl.pathname + resetUrl.search}>{t('Volver al inicio de los resultados')}</a></div>}
       {!failure && events.length === 0 && <p class="mb-6">{t('No hay coincidencias. Ajusta los filtros o la búsqueda.')}</p>}
       <div class="events-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 transition-opacity duration-300">

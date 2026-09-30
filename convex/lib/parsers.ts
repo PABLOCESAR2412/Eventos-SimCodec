@@ -17,7 +17,7 @@ function devpostDates(value: unknown): { start: number; end: number } {
     end: Date.UTC(year, last, Number(match[5]) + 1) - 1 };
 }
 const base = (source: string): EventInput => ({ title: "", description: "", dateStart: NaN, country: "Global",
-  isVirtual: true, isHybrid: false, category: "Eventos", isFree: false, registrationUrl: "",
+  isVirtual: true, isHybrid: false, category: "Eventos", isFree: false, priceStatus: "UNKNOWN", registrationUrl: "",
   status: "PUBLISHED", language: "en", tags: [], source, isLinkValid: true, kind: "EVENT" });
 export function parseDevpost(body: string): EventInput[] {
   const data = row(JSON.parse(body));
@@ -34,7 +34,7 @@ export function parseDevpost(body: string): EventInput[] {
       city: location || "Virtual", isVirtual: !location || /online/i.test(location),
       dateStart: Number.isFinite(date(hack.submissions_start)) ? date(hack.submissions_start) : period.start,
       dateEnd: Number.isFinite(end) ? end : undefined,
-      imageUrl: text(hack.thumbnail_url, 2048).replace(/^\/\//, "https://") || undefined, isFree: true, price: "Gratis",
+      imageUrl: text(hack.thumbnail_url, 2048).replace(/^\/\//, "https://") || undefined, isFree: true, priceStatus: "FREE", priceAmount: 0, price: "Gratis",
       organizer: text(hack.organization_name) || "Devpost", tags };
   });
 }

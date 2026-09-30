@@ -22,7 +22,11 @@ export const eventFields = {
   price: v.optional(v.string()),
   officialUrl: v.optional(v.string()),
   registrationUrl: v.string(),
-  status: v.string(),
+  status: v.union(
+    v.literal("PUBLISHED"),
+    v.literal("FINISHED"),
+    v.literal("QUARANTINED"),
+  ),
   language: v.string(),
   durationMinutes: v.optional(v.number()),
   tags: v.array(v.string()),
@@ -31,9 +35,11 @@ export const eventFields = {
   source: v.string(),
   apiUsed: v.optional(v.string()),
   isLinkValid: v.boolean(),
-  kind: v.optional(v.union(v.literal("EVENT"), v.literal("COURSE"))),
-  priceStatus: v.optional(
-    v.union(v.literal("FREE"), v.literal("PAID"), v.literal("UNKNOWN")),
+  kind: v.union(v.literal("EVENT"), v.literal("COURSE")),
+  priceStatus: v.union(
+    v.literal("FREE"),
+    v.literal("PAID"),
+    v.literal("UNKNOWN"),
   ),
   priceAmount: v.optional(v.number()),
   priceCurrency: v.optional(v.string()),
@@ -155,9 +161,4 @@ export function requireSecret(token: string, expected: string | undefined) {
   for (let i = 0; i < expected.length; i++)
     difference |= token.charCodeAt(i) ^ expected.charCodeAt(i);
   if (difference) throw new Error("Unauthorized");
-}
-export function requireCatalog(token?: string) {
-  // Enable only after the new SSR client is deployed; then direct queries are denied before reading data.
-  if (process.env.CATALOG_REQUIRE_TOKEN === "true")
-    requireSecret(token ?? "", process.env.CATALOG_TOKEN);
 }

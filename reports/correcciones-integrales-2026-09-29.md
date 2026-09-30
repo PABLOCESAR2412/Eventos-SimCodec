@@ -8,7 +8,9 @@ El cliente SSR comparte dos argumentos de consulta: eventos y cursos. Los parám
 
 Si el conjunto supera el presupuesto, la consulta falla de forma explícita: nunca comunica resultados parciales como un catálogo completo. Antes de superar esa capacidad debe añadirse un catálogo materializado, sin incrementar el presupuesto de búsqueda por visitante. El catálogo actual cabe ampliamente: 24 eventos y 31 cursos antes de restaurar dos enlaces afectados por la política anterior.
 
-Las consultas de catálogo requieren un secreto exclusivo del servidor. La limitación de frecuencia usa contadores atómicos en Convex: 60 peticiones por dirección y minuto, 300 globales por minuto; login, 5 intentos por dirección cada 15 minutos, 100 globales en ese período. Los identificadores son HMAC de la dirección, sin almacenar IP en claro. Los contadores caducados se eliminan mediante mantenimiento acotado.
+Las consultas de catálogo requieren un secreto exclusivo del servidor. Las consultas anteriores `getCatalogPage` y `getActiveEvents`, y los índices sin consumidores, fueron retirados después de publicar el cliente nuevo. Tipo y estado del precio son obligatorios tras verificar la migración; el estado del evento admite únicamente publicado, terminado o en cuarentena. Las categorías históricas se conservan.
+
+La limitación de frecuencia usa contadores atómicos en Convex: 60 peticiones por dirección y minuto, 300 globales por minuto; login, 5 intentos por dirección cada 15 minutos, 100 globales en ese período. Los identificadores son HMAC de la dirección, sin almacenar IP en claro. Los contadores caducados se eliminan mediante mantenimiento acotado. El limitador hace lecturas/escrituras pequeñas e indexadas; las solicitudes denegadas no consultan eventos. Vercel sobrescribe el [header de dirección](https://vercel.com/docs/headers/request-headers#x-forwarded-for) para evitar falsificaciones.
 
 ## Funcionalidad y contratos
 
@@ -36,7 +38,7 @@ Las credenciales se entregan en un archivo privado fuera del repositorio, con pe
 
 Backup de producción, incluidos archivos, antes de migrar. Migración idempotente de contratos: 142 registros con versión 2; cero fechas invertidas activas; dos pares de fechas originales preservados y registros en cuarentena. Cero contratos de precio ausentes y cero dominios publicados rechazados por la lista de destinos.
 
-Las reproducciones quedan convertidas en pruebas permanentes. CI ejecuta pruebas, Astro/TypeScript, tipos Convex, build y auditoría de dependencias. Las pruebas del modal simulan el evento nativo `cancel`: no equivalen a comprobar el teclado en un navegador real.
+Las reproducciones quedan convertidas en 53 pruebas permanentes, todas positivas. CI ejecuta pruebas, Astro/TypeScript, tipos Convex, build y auditoría de dependencias. El [primer workflow](https://github.com/PABLOCESAR2412/Eventos-SimCodec/actions/runs/36648406241) completó satisfactoriamente. Las pruebas del modal simulan el evento nativo `cancel`: no equivalen a comprobar el teclado en un navegador real.
 
 No hay navegador habilitado en este entorno, por lo que no se ha comprobado visualmente la interfaz ni con lector de pantalla. Convex sigue informando que el equipo supera límites del plan Free; estos cambios reducen consumo del proyecto, pero no acreditan que la cuota global del equipo se haya recuperado.
 

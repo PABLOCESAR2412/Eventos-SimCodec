@@ -1,6 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { createSession, readLoginForm, sameOriginForm, SESSION_COOKIE, SESSION_SECONDS, validSession, verifyPassword } from '../../lib/admin-auth';
+import { createSession, LoginInputError, readLoginForm, sameOriginForm, SESSION_COOKIE, SESSION_SECONDS, validSession, verifyPassword } from '../../lib/admin-auth';
 import { consumeRate } from '../../lib/rate-limit';
 const username = process.env.ADMIN_USERNAME, passwordHash = process.env.ADMIN_PASSWORD_HASH, secret = process.env.ADMIN_SESSION_SECRET;
 let error = '', submittedUsername = '';
@@ -14,7 +14,11 @@ else if (Astro.request.method === 'POST') {
       if (!rate.allowed) { error = 'Demasiados intentos. Espera 15 minutos antes de volver a intentar.'; Astro.response.status = 429; Astro.response.headers.set('Retry-After', String(rate.retryAfter)); }
       else {
         const form = await readLoginForm(Astro.request);
-        submittedUsername = (form.get('username') ?? '').trim().slice(0, 64);
+        submittedUsername = (form.get('username') ?? '').trim();
+        if (form.getAll('username').length !== 1 || form.getAll('password').length !== 1 || submittedUsername.length < 3 || submittedUsername.length > 64) {
+          submittedUsername = submittedUsername.slice(0, 64);
+          throw new LoginInputError('Invalid fields');
+        }
         const password = form.get('password') ?? '', passwordMatches = verifyPassword(password, passwordHash);
         if (submittedUsername !== username || password.length < 12 || !passwordMatches) { error = 'Usuario o contraseña incorrectos. Revisa tus datos e intenta de nuevo.'; Astro.response.status = 401; }
         else {
@@ -22,7 +26,10 @@ else if (Astro.request.method === 'POST') {
           return Astro.redirect('/admin', 303);
         }
       }
-    } catch { error = 'No se pudo iniciar sesión. Recarga la página e intenta de nuevo.'; Astro.response.status = 503; }
+    } catch (failure) {
+      error = failure instanceof LoginInputError ? 'El formulario no es válido. Revisa los campos e intenta de nuevo.' : 'No se pudo iniciar sesión. Recarga la página e intenta de nuevo.';
+      Astro.response.status = failure instanceof LoginInputError ? failure.status : 503;
+    }
   }
 }
 ---

@@ -9,30 +9,11 @@ import {
   normalizeEvent,
   sameContent,
   requireAdmin,
-  requireCatalog,
+  requireSecret,
 } from "./lib/model";
-import {
-  catalogPage,
-  CATALOG_ROWS,
-  CATALOG_BYTES,
-  priceInfo,
-} from "../shared/domain";
+import { CATALOG_ROWS, CATALOG_BYTES, priceInfo } from "../shared/domain";
 import type { Doc } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
-import { requireSecret } from "./lib/model";
-const strings = v.optional(v.array(v.string()));
-const filters = {
-  searchTerm: v.optional(v.string()),
-  categories: strings,
-  cities: strings,
-  kind: v.optional(v.union(v.literal("EVENT"), v.literal("COURSE"))),
-  sources: strings,
-  topics: strings,
-  modalities: strings,
-  costs: strings,
-  dateFrom: v.optional(v.number()),
-  dateTo: v.optional(v.number()),
-};
 function publicEvent(e: Doc<"events">) {
   return {
     _id: e._id,
@@ -51,30 +32,23 @@ function publicEvent(e: Doc<"events">) {
     price: e.price,
     ...priceInfo(e),
     imageUrl: e.imageUrl,
-    kind: e.kind ?? ("EVENT" as const),
+    kind: e.kind,
     searchText: e.searchText,
   };
 }
-async function readCatalog(ctx: QueryCtx, kind?: "EVENT" | "COURSE") {
+async function readCatalog(ctx: QueryCtx, kind: "EVENT" | "COURSE") {
   const options = {
     cursor: null,
     numItems: CATALOG_ROWS,
     maximumRowsRead: CATALOG_ROWS,
     maximumBytesRead: CATALOG_BYTES,
   };
-  const candidates = kind
-    ? await ctx.db
-        .query("events")
-        .withIndex("by_catalog_kind", (q) =>
-          q.eq("status", "PUBLISHED").eq("isLinkValid", true).eq("kind", kind),
-        )
-        .paginate(options)
-    : await ctx.db
-        .query("events")
-        .withIndex("by_catalog", (q) =>
-          q.eq("status", "PUBLISHED").eq("isLinkValid", true),
-        )
-        .paginate(options);
+  const candidates = await ctx.db
+    .query("events")
+    .withIndex("by_catalog_kind", (q) =>
+      q.eq("status", "PUBLISHED").eq("isLinkValid", true).eq("kind", kind),
+    )
+    .paginate(options);
   if (!candidates.isDone)
     throw new Error(
       "CATALOG_CAPACITY: bounded catalog exceeded; create a materialized catalog before increasing capacity",
@@ -89,84 +63,6 @@ export const getCatalogData = query({
   handler: async (ctx, args) => {
     requireSecret(args.token, process.env.CATALOG_TOKEN);
     return readCatalog(ctx, args.kind);
-  },
-});
-export const getCatalogPage = query({
-  args: {
-    ...filters,
-    token: v.optional(v.string()),
-    paginationOpts: paginationOptsValidator,
-  },
-  handler: async (ctx, args) => {
-    requireCatalog(args.token);
-    for (const values of [
-      args.categories,
-      args.cities,
-      args.sources,
-      args.topics,
-      args.modalities,
-      args.costs,
-    ]) {
-      if (
-        values &&
-        (values.length > 60 || values.some((value) => value.length > 100))
-      )
-        throw new Error("Invalid filters");
-    }
-    if ((args.searchTerm?.length ?? 0) > 100) throw new Error("Invalid search");
-    // Ordinary indexed pagination enforces budgets; text-search pagination does not.
-    // Filter the complete bounded candidate set before slicing the visible page.
-    const result = catalogPage(
-      await readCatalog(ctx, args.kind),
-      args,
-      args.paginationOpts.cursor,
-      args.paginationOpts.numItems,
-    );
-    return {
-      ...result,
-      page: result.page.map(({ searchText: _searchText, ...event }) => event),
-    };
-  },
-});
-// Retained only for rollback compatibility; the same server gate protects it.
-export const getActiveEvents = query({
-  args: {
-    token: v.optional(v.string()),
-    searchTerm: v.optional(v.string()),
-    category: v.optional(v.string()),
-    isFree: v.optional(v.boolean()),
-    isVirtual: v.optional(v.boolean()),
-    city: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    requireCatalog(args.token);
-    const page = await ctx.db
-      .query("events")
-      .withIndex("by_catalog", (q) =>
-        q.eq("status", "PUBLISHED").eq("isLinkValid", true),
-      )
-      .paginate({
-        cursor: null,
-        numItems: 48,
-        maximumRowsRead: 48,
-        maximumBytesRead: 200_000,
-      });
-    return page.page
-      .filter(
-        (e) =>
-          (!args.category || e.category === args.category) &&
-          (args.isFree === undefined ||
-            (args.isFree
-              ? priceInfo(e).priceStatus === "FREE"
-              : priceInfo(e).priceStatus === "PAID")) &&
-          (args.isVirtual === undefined || e.isVirtual === args.isVirtual) &&
-          (!args.city || e.city === args.city) &&
-          (!args.searchTerm ||
-            (e.title + " " + e.description)
-              .toLowerCase()
-              .includes(args.searchTerm.slice(0, 100).toLowerCase())),
-      )
-      .map(publicEvent);
   },
 });
 export const saveEvents = internalMutation({
