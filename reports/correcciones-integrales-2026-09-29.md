@@ -40,7 +40,11 @@ Las credenciales se entregan en un archivo privado fuera del repositorio, con pe
 
 Backup de producción, incluidos archivos, antes de migrar. Migración idempotente de contratos: 142 registros con versión 2; cero fechas invertidas activas; dos pares de fechas originales preservados y registros en cuarentena. Cero contratos de precio ausentes y cero dominios publicados rechazados por la lista de destinos.
 
-Las reproducciones quedan convertidas en 54 pruebas permanentes, todas positivas. CI ejecuta pruebas, Astro/TypeScript, tipos Convex, build y auditoría de dependencias. El [workflow de contratos y retirada de consultas antiguas](https://github.com/PABLOCESAR2412/Eventos-SimCodec/actions/runs/36649509495) completó satisfactoriamente. Las pruebas del modal simulan el evento nativo `cancel`: no equivalen a comprobar el teclado en un navegador real.
+Las reproducciones quedan convertidas en 54 pruebas permanentes, todas positivas. CI ejecuta pruebas, Astro/TypeScript, tipos Convex, build y auditoría de dependencias. El [workflow de la versión con cursores administrativos firmados](https://github.com/PABLOCESAR2412/Eventos-SimCodec/actions/runs/36650333725) completó satisfactoriamente. Las pruebas del modal simulan el evento nativo `cancel`: no equivalen a comprobar el teclado en un navegador real.
+
+Verificación HTTP y de datos en producción, 29 de septiembre a las 19:27 de Ecuador: 32 comprobaciones positivas. Incluyen filtros poco frecuentes, tres páginas recorridas hacia atrás, interfaz inglesa, login sin desafío HTTP Basic, sesión y logout, paginación administrativa firmada, rechazo de cursores inválidos y consultas directas sin autorización. El catálogo en ese instante contiene 24 eventos y 32 cursos; mantenimiento dejó 140 registros en la tabla operativa. Los dos históricos pasaron al archivo de File Storage: el backup posterior conserva ambos documentos con contrato versión 2 y sus fechas originales. Hay snapshots completos, incluidos archivos, antes y después de la migración.
+
+Se inspeccionaron 89 archivos entre fuentes versionadas y recursos públicos generados: ninguno contiene las credenciales, tokens ni secretos de sesión provisionados.
 
 No hay navegador habilitado en este entorno, por lo que no se ha comprobado visualmente la interfaz ni con lector de pantalla. Convex sigue informando que el equipo supera límites del plan Free; estos cambios reducen consumo del proyecto, pero no acreditan que la cuota global del equipo se haya recuperado.
 
