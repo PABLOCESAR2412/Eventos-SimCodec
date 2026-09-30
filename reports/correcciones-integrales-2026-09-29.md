@@ -6,7 +6,7 @@ Las búsquedas ya no usan el índice de texto de Convex. El servidor obtiene can
 
 El cliente SSR comparte dos argumentos de consulta: eventos y cursos. Los parámetros de búsqueda no crean variantes de consultas a la base de datos. Hay una caché de datos de 60 segundos por instancia y se conserva la caché pública de Vercel de 300 segundos.
 
-Si el conjunto supera el presupuesto, la consulta falla de forma explícita: nunca comunica resultados parciales como un catálogo completo. Antes de superar esa capacidad debe añadirse un catálogo materializado, sin incrementar el presupuesto de búsqueda por visitante. El catálogo actual cabe ampliamente: 24 eventos y 31 cursos antes de restaurar dos enlaces afectados por la política anterior.
+Si el conjunto supera el presupuesto, la consulta falla de forma explícita: nunca comunica resultados parciales como un catálogo completo. Antes de superar esa capacidad debe añadirse un catálogo materializado, sin incrementar el presupuesto de búsqueda por visitante. El catálogo comprobado después de restaurar dos enlaces afectados por la política anterior contiene 25 eventos (22.773 bytes) y 32 cursos (79.443 bytes).
 
 Las consultas de catálogo requieren un secreto exclusivo del servidor. Las consultas anteriores `getCatalogPage` y `getActiveEvents`, y los índices sin consumidores, fueron retirados después de publicar el cliente nuevo. Tipo y estado del precio son obligatorios tras verificar la migración; el estado del evento admite únicamente publicado, terminado o en cuarentena. Las categorías históricas se conservan.
 
@@ -32,13 +32,15 @@ La limitación de frecuencia usa contadores atómicos en Convex: 60 peticiones p
 
 La cookie de sesión está firmada, dura 8 horas y utiliza `HttpOnly`, `Secure` en producción y `SameSite=Strict`. Formularios de login/logout exigen el mismo origen. El cuerpo del login está limitado a 4 KB. Administración usa `private, no-store`, `noindex` y protección contra frames.
 
+Los enlaces de paginación administrativa llevan cursores firmados con un propósito distinto al de la sesión. Una entrada alterada devuelve HTTP 400 con recuperación antes de consultar Convex; los fallos del servicio conservan HTTP 503.
+
 Las credenciales se entregan en un archivo privado fuera del repositorio, con permisos exclusivos del usuario y SYSTEM. Para revocar todas las sesiones, rota `ADMIN_SESSION_SECRET` y vuelve a desplegar. Al cambiar la contraseña, rota también ese secreto. No se incluyeron secretos en commits ni en este informe.
 
 ## Datos y pruebas
 
 Backup de producción, incluidos archivos, antes de migrar. Migración idempotente de contratos: 142 registros con versión 2; cero fechas invertidas activas; dos pares de fechas originales preservados y registros en cuarentena. Cero contratos de precio ausentes y cero dominios publicados rechazados por la lista de destinos.
 
-Las reproducciones quedan convertidas en 53 pruebas permanentes, todas positivas. CI ejecuta pruebas, Astro/TypeScript, tipos Convex, build y auditoría de dependencias. El [primer workflow](https://github.com/PABLOCESAR2412/Eventos-SimCodec/actions/runs/36648406241) completó satisfactoriamente. Las pruebas del modal simulan el evento nativo `cancel`: no equivalen a comprobar el teclado en un navegador real.
+Las reproducciones quedan convertidas en 54 pruebas permanentes, todas positivas. CI ejecuta pruebas, Astro/TypeScript, tipos Convex, build y auditoría de dependencias. El [workflow de contratos y retirada de consultas antiguas](https://github.com/PABLOCESAR2412/Eventos-SimCodec/actions/runs/36649509495) completó satisfactoriamente. Las pruebas del modal simulan el evento nativo `cancel`: no equivalen a comprobar el teclado en un navegador real.
 
 No hay navegador habilitado en este entorno, por lo que no se ha comprobado visualmente la interfaz ni con lector de pantalla. Convex sigue informando que el equipo supera límites del plan Free; estos cambios reducen consumo del proyecto, pero no acreditan que la cuota global del equipo se haya recuperado.
 
