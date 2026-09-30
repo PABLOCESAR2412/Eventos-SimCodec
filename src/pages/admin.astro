@@ -3,26 +3,30 @@ import Layout from '../layouts/Layout.astro';
 import { convex } from '../lib/convex';
 import { api } from '../../convex/_generated/api';
 import { formatDate } from '../../shared/domain';
+import { AdminCursorError, decodeAdminCursor, encodeAdminCursor } from '../lib/admin-pagination';
 Astro.response.headers.set('Cache-Control', 'private, no-store');
 const token = process.env.ADMIN_TOKEN || import.meta.env.ADMIN_TOKEN;
-if (!token) return new Response('Administración no configurada.', { status: 503 });
+const sessionSecret = process.env.ADMIN_SESSION_SECRET;
+if (!token || !sessionSecret) return new Response('Administración no configurada.', { status: 503 });
 let error = '';
 async function loadAdmin() {
+  const cursor = decodeAdminCursor(Astro.url.searchParams.get('cursor'), sessionSecret!);
   return Promise.all([
-    convex.query(api.events.getAllEventsAdmin, { token: token!, paginationOpts: { cursor: Astro.url.searchParams.get('cursor')?.slice(0, 4096) || null, numItems: 50 } }),
+    convex.query(api.events.getAllEventsAdmin, { token: token!, paginationOpts: { cursor, numItems: 50 } }),
     convex.query(api.events.getAdminLogs, { token: token! }),
   ]);
 }
 let data: Awaited<ReturnType<typeof loadAdmin>>;
 try { data = await loadAdmin(); }
 catch (failure) {
-  const invalid = /InvalidCursor|Invalid cursor/i.test(String(failure));
+  const invalid = failure instanceof AdminCursorError;
   Astro.response.status = invalid ? 400 : 503;
   error = invalid ? 'La página no es válida. Vuelve al inicio de administración.' : 'No se pudo cargar administración. Intenta de nuevo en un minuto.';
   data = [{ page: [], isDone: true, continueCursor: '' }, []];
 }
 const [result, logs] = data;
-const nextUrl = new URL(Astro.url); nextUrl.searchParams.set('cursor', result.continueCursor);
+const nextUrl = new URL(Astro.url);
+if (!result.isDone) nextUrl.searchParams.set('cursor', encodeAdminCursor(result.continueCursor, sessionSecret));
 ---
 <Layout title="SimCodec | Administración" description="Estado de fuentes e ingestión.">
   <main class="max-w-7xl mx-auto px-6 pt-36 pb-12">

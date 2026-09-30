@@ -2,6 +2,11 @@ import { rejects } from "node:assert/strict";
 import { expect, test } from "bun:test";
 import { getCatalogData, recordLinkResults } from "../convex/events";
 import { syncApiSources } from "../convex/actions";
+import {
+  AdminCursorError,
+  decodeAdminCursor,
+  encodeAdminCursor,
+} from "../src/lib/admin-pagination";
 import { repairContracts, repairLegacyLinkHealth } from "../convex/maintenance";
 import { consume } from "../convex/security";
 import {
@@ -263,6 +268,20 @@ test("login verifies password without accepting malformed hashes", () => {
   expect(verifyPassword("strong-test-password", hash)).toBe(true);
   expect(verifyPassword("wrong", hash)).toBe(false);
   expect(verifyPassword("strong-test-password", "invalid")).toBe(false);
+});
+test("admin cursors round trip and reject tampering before database access", () => {
+  const secret = "s".repeat(64),
+    cursor = encodeAdminCursor("opaque-convex-cursor", secret);
+  expect(decodeAdminCursor(null, secret)).toBeNull();
+  expect(decodeAdminCursor(cursor, secret)).toBe("opaque-convex-cursor");
+  expect(() => decodeAdminCursor("invalid", secret)).toThrow(AdminCursorError);
+  expect(() => decodeAdminCursor(cursor + "x", secret)).toThrow(
+    AdminCursorError,
+  );
+  expect(() => decodeAdminCursor(cursor, "t".repeat(64))).toThrow(
+    AdminCursorError,
+  );
+  expect(validSession(cursor, "admin", secret)).toBe(false);
 });
 test("session rejects tampering, expiry and another user", () => {
   const secret = "s".repeat(64),
