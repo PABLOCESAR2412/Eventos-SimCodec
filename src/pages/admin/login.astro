@@ -1,0 +1,49 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { createSession, readLoginForm, sameOriginForm, SESSION_COOKIE, SESSION_SECONDS, validSession, verifyPassword } from '../../lib/admin-auth';
+import { consumeRate } from '../../lib/rate-limit';
+const username = process.env.ADMIN_USERNAME, passwordHash = process.env.ADMIN_PASSWORD_HASH, secret = process.env.ADMIN_SESSION_SECRET;
+let error = '', submittedUsername = '';
+if (validSession(Astro.cookies.get(SESSION_COOKIE)?.value, username, secret)) return Astro.redirect('/admin', 303);
+if (!username || !passwordHash || !secret) { error = 'Acceso temporalmente no disponible. Intenta de nuevo más tarde.'; Astro.response.status = 503; }
+else if (Astro.request.method === 'POST') {
+  if (!sameOriginForm(Astro.request, Astro.url)) { error = 'La solicitud no es válida. Recarga la página e intenta de nuevo.'; Astro.response.status = 403; }
+  else {
+    try {
+      const rate = await consumeRate(Astro.clientAddress, 'login');
+      if (!rate.allowed) { error = 'Demasiados intentos. Espera 15 minutos antes de volver a intentar.'; Astro.response.status = 429; Astro.response.headers.set('Retry-After', String(rate.retryAfter)); }
+      else {
+        const form = await readLoginForm(Astro.request);
+        submittedUsername = (form.get('username') ?? '').trim().slice(0, 64);
+        const password = form.get('password') ?? '', passwordMatches = verifyPassword(password, passwordHash);
+        if (submittedUsername !== username || password.length < 12 || !passwordMatches) { error = 'Usuario o contraseña incorrectos. Revisa tus datos e intenta de nuevo.'; Astro.response.status = 401; }
+        else {
+          Astro.cookies.set(SESSION_COOKIE, createSession(username, secret), { httpOnly: true, secure: Astro.url.protocol === 'https:', sameSite: 'strict', path: '/admin', maxAge: SESSION_SECONDS });
+          return Astro.redirect('/admin', 303);
+        }
+      }
+    } catch { error = 'No se pudo iniciar sesión. Recarga la página e intenta de nuevo.'; Astro.response.status = 503; }
+  }
+}
+---
+<Layout title="SimCodec | Iniciar sesión" description="Acceso administrativo de SimCodec.">
+  <main class="mx-auto max-w-md px-6 pt-20 pb-16 sm:pt-28">
+    <h1 class="text-3xl font-bold tracking-tight mb-3">Acceso administrativo</h1>
+    <p class="text-gray-700 dark:text-gray-300 mb-8">Inicia sesión para revisar eventos, fuentes y peticiones.</p>
+    <form method="post" action="/admin/login" id="admin-login" class="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-xl p-6 sm:p-8 space-y-6">
+      {error && <p role="alert" id="login-error" class="text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/40 rounded-lg p-3">{error}</p>}
+      <div><label for="username" class="block font-semibold mb-2">Usuario</label><input id="username" name="username" type="text" autocomplete="username" required minlength="3" maxlength="64" value={submittedUsername} aria-describedby={error ? 'login-error' : undefined} class="login-input" /></div>
+      <div><label for="password" class="block font-semibold mb-2">Contraseña</label><div class="relative"><input id="password" name="password" type="password" autocomplete="current-password" required minlength="12" maxlength="128" aria-describedby={error ? 'login-error' : undefined} class="login-input" /><button id="show-password" type="button" aria-controls="password" aria-pressed="false" class="absolute inset-y-0 right-1 min-h-11 px-3 text-sm font-semibold text-blue-700 dark:text-blue-300 rounded-lg focus-visible:outline-2 focus-visible:outline-[var(--color-sim-action)]">Mostrar</button></div></div>
+      <button id="login-submit" type="submit" class="w-full min-h-12 px-4 py-3 rounded-lg bg-[var(--color-sim-action)] hover:bg-blue-700 text-white font-semibold disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-sim-action)]">Iniciar sesión</button>
+      <p class="text-sm text-gray-700 dark:text-gray-300">La sesión dura 8 horas. Cierra sesión si utilizas un equipo compartido.</p>
+    </form>
+    <a href="/" class="inline-block mt-6 py-2 text-blue-700 dark:text-blue-300 underline underline-offset-4">Volver al catálogo</a>
+  </main>
+</Layout>
+<style>.login-input { width:100%; min-height:48px; padding:.75rem; border:1px solid var(--border-color); border-radius:8px; background:var(--bg-color); color:var(--text-color); caret-color:var(--color-sim-action); } .login-input:focus-visible { outline:2px solid var(--color-sim-action); outline-offset:2px; } #password { padding-right:6rem; }</style>
+<script>
+  const password = document.querySelector<HTMLInputElement>('#password');
+  const show = document.querySelector<HTMLButtonElement>('#show-password');
+  show?.addEventListener('click', () => { if (!password) return; const visible = password.type === 'password'; password.type = visible ? 'text' : 'password'; show.textContent = visible ? 'Ocultar' : 'Mostrar'; show.setAttribute('aria-pressed', String(visible)); });
+  document.querySelector<HTMLFormElement>('#admin-login')?.addEventListener('submit', () => { const button = document.querySelector<HTMLButtonElement>('#login-submit'); if (button) { button.disabled = true; button.textContent = 'Iniciando sesión…'; } });
+</script>

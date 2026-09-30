@@ -2,28 +2,41 @@
 import Layout from '../layouts/Layout.astro';
 import { convex } from '../lib/convex';
 import { api } from '../../convex/_generated/api';
+import { formatDate } from '../../shared/domain';
 Astro.response.headers.set('Cache-Control', 'private, no-store');
 const token = process.env.ADMIN_TOKEN || import.meta.env.ADMIN_TOKEN;
 if (!token) return new Response('Administración no configurada.', { status: 503 });
-const [result, logs] = await Promise.all([
-  convex.query(api.events.getAllEventsAdmin, { token, paginationOpts: { cursor: Astro.url.searchParams.get('cursor')?.slice(0, 4096) || null, numItems: 50 } }),
-  convex.query(api.events.getAdminLogs, { token }),
-]);
+let error = '';
+async function loadAdmin() {
+  return Promise.all([
+    convex.query(api.events.getAllEventsAdmin, { token: token!, paginationOpts: { cursor: Astro.url.searchParams.get('cursor')?.slice(0, 4096) || null, numItems: 50 } }),
+    convex.query(api.events.getAdminLogs, { token: token! }),
+  ]);
+}
+let data: Awaited<ReturnType<typeof loadAdmin>>;
+try { data = await loadAdmin(); }
+catch {
+  Astro.response.status = Astro.url.searchParams.has('cursor') ? 400 : 503;
+  error = Astro.url.searchParams.has('cursor') ? 'La página no es válida. Vuelve al inicio de administración.' : 'No se pudo cargar administración. Intenta de nuevo en un minuto.';
+  data = [{ page: [], isDone: true, continueCursor: '' }, []];
+}
+const [result, logs] = data;
 const nextUrl = new URL(Astro.url); nextUrl.searchParams.set('cursor', result.continueCursor);
 ---
 <Layout title="SimCodec | Administración" description="Estado de fuentes e ingestión.">
   <main class="max-w-7xl mx-auto px-6 pt-36 pb-12">
-    <h1 class="text-3xl font-bold mb-4">Estado de ingestión</h1>
-    <p class="mb-8 text-gray-500">Últimas 30 ejecuciones. Cada lote admite 100 eventos. Almacenamiento y cuota: consultar el dashboard de Convex.</p>
+    <div class="flex flex-wrap justify-between items-center gap-4 mb-6"><h1 class="text-3xl font-bold">Estado de ingestión</h1><form method="post" action="/admin/logout"><button type="submit" class="min-h-11 px-4 py-2 rounded-lg border border-[var(--border-color)] focus-visible:outline-2 focus-visible:outline-[var(--color-sim-action)]">Cerrar sesión</button></form></div>
+    {error && <p role="alert" class="mb-6">{error} <a href="/admin" class="underline">Volver al inicio</a></p>}
+    <p class="mb-8 text-gray-500">Últimas 30 ejecuciones. Cada lote admite 100 eventos. Catálogo: máximo 256 candidatos o 600 KB por tipo, sin truncar resultados. Almacenamiento y cuota: consultar el dashboard de Convex.</p>
     <div class="overflow-x-auto border border-[var(--border-color)] rounded-xl mb-12">
       <table class="w-full text-sm text-left">
         <thead><tr>{['Tarea', 'Estado', 'Añadidos', 'Actualizados', 'Omitidos', 'Rechazados', 'Peticiones', 'Duración', 'Próxima ejecución'].map(title => <th class="p-3">{title}</th>)}</tr></thead>
         <tbody>{logs.map(log => <tr class="border-t border-[var(--border-color)]">
-          <td class="p-3">{log.taskName}<details><summary>Detalles</summary><p>{log.details}</p><p>{log.errorMessage}</p><time>{new Date(log.executedAt).toLocaleString('es-EC')}</time></details></td>
+          <td class="p-3">{log.taskName}<details><summary>Detalles</summary><p>{log.details}</p><p>{log.errorMessage}</p><time>{formatDate(log.executedAt)}</time></details></td>
           <td class="p-3">{log.status}</td><td class="p-3">{log.eventsAdded}</td><td class="p-3">{log.eventsUpdated ?? '—'}</td>
           <td class="p-3">{log.eventsSkipped ?? '—'}</td><td class="p-3">{log.eventsRejected ?? '—'}</td><td class="p-3">{log.requests ?? '—'}</td>
           <td class="p-3">{log.durationMs === undefined ? '—' : (log.durationMs / 1000).toFixed(1) + ' s'}</td>
-          <td class="p-3">{log.nextRunAt ? new Date(log.nextRunAt).toLocaleString('es-EC') : 'Sin datos históricos'}</td>
+          <td class="p-3">{log.nextRunAt ? formatDate(log.nextRunAt) : 'Sin datos históricos'}</td>
         </tr>)}</tbody>
       </table>
     </div>

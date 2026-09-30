@@ -1,31 +1,16 @@
 ---
-const cities = ['Quito', 'Guayaquil', 'Cuenca', 'Virtual'];
-const categories = ['Eventos', 'Formación', 'Competencias', 'Emprendimiento', 'Financiamiento', 'Comunidad', 'Empleo'];
-
-// Subcategorías / Temas
-const topics = [
-  'Conferencias', 'Congresos', 'Charlas', 'Meetups', 'Workshops', 'Seminarios', 'Ferias Tecnológicas', 'Ferias Empresariales', 'Networking', 'Webinars',
-  'Cursos', 'Bootcamps', 'Diplomados', 'Certificaciones', 'Talleres', 'Programas de Capacitación',
-  'Hackathons', 'Concursos', 'Olimpiadas', 'Competencias de IA', 'Competencias de Ciencia de Datos', 'Competencias de Programación',
-  'Convocatorias', 'Incubadoras', 'Aceleradoras', 'Startup Programs', 'Demo Days', 'Pitch Competitions',
-  'Becas', 'Grants', 'Fondos de Innovación', 'Capital Semilla', 'Fondos de Investigación',
-  'Mentorías', 'Comunidades Tech', 'User Groups', 'Capítulos IEEE', 'Google Developer Groups', 'Women Techmakers',
-  'Ferias de Empleo', 'Recruiting Events', 'Career Days', 'Tech Recruiting', 'IA', 'Cloud', 'Startups', 'Ecuador'
-];
-
-// Orígenes (Fuentes)
-const sources = [
-  'Eventbrite', 'Luma', 'Devpost', 'MLH', 'Coursera', 'edX', 'AWS', 'Google Cloud',
-  'Azure', 'OpenAI', 'HuggingFace', 'Startup Grind', 'Techstars', 'Fulbright', 'EPN', 'ESPOL'
-];
-
+import { filterOptions } from '../../shared/domain';
+import { translator, localeForPath } from '../lib/i18n';
+const t = translator(localeForPath(Astro.url.pathname));
+const cities = filterOptions.city, categories = filterOptions.category, topics = filterOptions.topic, sources = filterOptions.source;
 const modalities = [
   { label: 'Presencial', value: 'presential' },
   { label: 'Virtual / Online', value: 'virtual' }
 ];
 const costs = [
   { label: 'Gratuito', value: 'free' },
-  { label: 'De Pago', value: 'paid' }
+  { label: 'De Pago', value: 'paid' },
+  { label: 'Consultar precio', value: 'unknown' }
 ];
 const dates = [
   { label: 'Este Mes', value: 'this-month' },
@@ -43,25 +28,25 @@ const activeFilters = filterKeys.reduce((count, key) => count + Astro.url.search
     <summary class="flex min-h-11 items-center justify-between gap-3 cursor-pointer list-none select-none rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-sim-action)]">
       <h2 class="text-lg font-bold text-[var(--text-color)] flex items-center gap-2 transition-colors duration-300">
         <svg class="w-5 h-5 text-[var(--color-sim-action)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
-        Filtros
+        {t('Filtros')}
       </h2>
       <div class="flex items-center gap-2">
-        {activeFilters > 0 && <span class="text-xs font-medium text-[var(--text-color)]">{activeFilters} activos</span>}
+        {activeFilters > 0 && <span class="text-xs font-medium text-[var(--text-color)]">{activeFilters} {t('activos')}</span>}
         <svg aria-hidden="true" class="w-4 h-4 text-[var(--text-color)] transition-transform group-open/filters:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
       </div>
     </summary>
     <div id="filter-controls" data-lenis-prevent class="pt-4 max-h-[65dvh] overflow-y-auto overscroll-contain custom-scrollbar lg:max-h-none lg:overflow-visible">
     <div class="flex justify-end mb-3">
       <button id="clear-filters" class="min-h-11 px-2 text-sm text-[var(--text-color)] hover:text-[var(--color-sim-action)] transition-colors duration-300 font-semibold hidden">
-        Limpiar
+        {t('Limpiar')}
       </button>
     </div>
 
-    <button id="apply-filters" class="w-full min-h-11 mb-5 py-2 rounded-lg bg-[var(--color-sim-action)] text-white font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-sim-action)]">Aplicar filtros y búsqueda</button>
+    <button id="apply-filters" class="w-full min-h-11 mb-5 py-2 rounded-lg bg-[var(--color-sim-action)] text-white font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-sim-action)]">{t('Aplicar filtros y búsqueda')}</button>
     <!-- Filtro de Categorías -->
     <details class="group mb-4" open>
       <summary class="flex justify-between items-center font-semibold text-gray-700 dark:text-gray-300 cursor-pointer list-none select-none">
-        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Categoría</span>
+        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('Categoría')}</span>
         <svg class="w-4 h-4 transition-transform group-open:rotate-180 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
       </summary>
       <div class="space-y-2 mt-3 pl-1">
@@ -72,7 +57,7 @@ const activeFilters = filterKeys.reduce((count, key) => count + Astro.url.search
               <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors duration-300"></div>
               <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{category}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{t(category)}</span>
           </label>
         ))}
       </div>
@@ -83,7 +68,7 @@ const activeFilters = filterKeys.reduce((count, key) => count + Astro.url.search
     <!-- Filtro de Proveedores (Sources) -->
     <details class="group mb-4">
       <summary class="flex justify-between items-center font-semibold text-gray-700 dark:text-gray-300 cursor-pointer list-none select-none">
-        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Plataformas</span>
+        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('Plataformas')}</span>
         <svg class="w-4 h-4 transition-transform group-open:rotate-180 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
       </summary>
       <div class="space-y-2 mt-3 pl-1 max-h-48 overflow-y-auto custom-scrollbar">
@@ -94,7 +79,7 @@ const activeFilters = filterKeys.reduce((count, key) => count + Astro.url.search
               <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors duration-300"></div>
               <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{source}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{t(source)}</span>
           </label>
         ))}
       </div>
@@ -105,7 +90,7 @@ const activeFilters = filterKeys.reduce((count, key) => count + Astro.url.search
     <!-- Filtro de Temas (Topics) -->
     <details class="group mb-4">
       <summary class="flex justify-between items-center font-semibold text-gray-700 dark:text-gray-300 cursor-pointer list-none select-none">
-        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Temáticas</span>
+        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('Temáticas')}</span>
         <svg class="w-4 h-4 transition-transform group-open:rotate-180 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
       </summary>
       <div class="space-y-2 mt-3 pl-1 max-h-48 overflow-y-auto custom-scrollbar">
@@ -116,7 +101,7 @@ const activeFilters = filterKeys.reduce((count, key) => count + Astro.url.search
               <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors duration-300"></div>
               <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{topic}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{t(topic)}</span>
           </label>
         ))}
       </div>
@@ -127,7 +112,7 @@ const activeFilters = filterKeys.reduce((count, key) => count + Astro.url.search
     <!-- Filtro de Fecha -->
     <details class="group mb-4" open hidden={isCourseView}>
       <summary class="flex justify-between items-center font-semibold text-gray-700 dark:text-gray-300 cursor-pointer list-none select-none">
-        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Fecha</span>
+        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('Fecha')}</span>
         <svg class="w-4 h-4 transition-transform group-open:rotate-180 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
       </summary>
       <div class="space-y-2 mt-3 pl-1">
@@ -138,7 +123,7 @@ const activeFilters = filterKeys.reduce((count, key) => count + Astro.url.search
               <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded-full bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors duration-300"></div>
               <div class="absolute w-2 h-2 bg-white rounded-full left-1.5 top-1.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity duration-300"></div>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{date.label}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{t(date.label)}</span>
           </label>
         ))}
       </div>
@@ -149,7 +134,7 @@ const activeFilters = filterKeys.reduce((count, key) => count + Astro.url.search
     <!-- Filtro de Modalidad -->
     <details class="group mb-4" open>
       <summary class="flex justify-between items-center font-semibold text-gray-700 dark:text-gray-300 cursor-pointer list-none select-none">
-        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Modalidad</span>
+        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('Modalidad')}</span>
         <svg class="w-4 h-4 transition-transform group-open:rotate-180 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
       </summary>
       <div class="space-y-2 mt-3 pl-1">
@@ -160,7 +145,7 @@ const activeFilters = filterKeys.reduce((count, key) => count + Astro.url.search
               <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors duration-300"></div>
               <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{mod.label}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{t(mod.label)}</span>
           </label>
         ))}
       </div>
@@ -171,7 +156,7 @@ const activeFilters = filterKeys.reduce((count, key) => count + Astro.url.search
     <!-- Filtro de Costo -->
     <details class="group mb-4" open>
       <summary class="flex justify-between items-center font-semibold text-gray-700 dark:text-gray-300 cursor-pointer list-none select-none">
-        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Costo</span>
+        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('Costo')}</span>
         <svg class="w-4 h-4 transition-transform group-open:rotate-180 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
       </summary>
       <div class="space-y-2 mt-3 pl-1">
@@ -182,7 +167,7 @@ const activeFilters = filterKeys.reduce((count, key) => count + Astro.url.search
               <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors duration-300"></div>
               <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{cost.label}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{t(cost.label)}</span>
           </label>
         ))}
       </div>
@@ -193,7 +178,7 @@ const activeFilters = filterKeys.reduce((count, key) => count + Astro.url.search
     <!-- Filtro de Ciudad -->
     <details class="group mb-2">
       <summary class="flex justify-between items-center font-semibold text-gray-700 dark:text-gray-300 cursor-pointer list-none select-none">
-        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Ubicación</span>
+        <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('Ubicación')}</span>
         <svg class="w-4 h-4 transition-transform group-open:rotate-180 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
       </summary>
       <div class="space-y-2 mt-3 pl-1">
@@ -204,7 +189,7 @@ const activeFilters = filterKeys.reduce((count, key) => count + Astro.url.search
               <div class="w-5 h-5 border border-gray-300 dark:border-[var(--border-color)] rounded bg-white dark:bg-gray-800 peer-checked:bg-[var(--color-sim-action)] peer-checked:border-[var(--color-sim-action)] transition-colors duration-300"></div>
               <svg class="absolute w-3.5 h-3.5 text-white left-0.5 top-0.5 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{city}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-[var(--color-sim-action)] transition-colors duration-300">{t(city)}</span>
           </label>
         ))}
       </div>
@@ -274,14 +259,5 @@ const activeFilters = filterKeys.reduce((count, key) => count + Astro.url.search
     document.querySelector('#clear-filters')?.classList.toggle('hidden', !hasFilters);
     document.querySelector('#clear-filters')?.addEventListener('click', () => location.assign(location.pathname + (params.get('view') === 'courses' ? '?view=courses' : '')));
     document.querySelector('#page-size')?.addEventListener('change', apply);
-    document.querySelector('#prev-page')?.addEventListener('click', () => {
-      const previous = sessionStorage.getItem('catalogPrevious');
-      if (previous?.startsWith(location.pathname + '?') || previous === location.pathname) location.assign(previous);
-      else { params.delete('cursor'); location.assign(location.pathname + '?' + params.toString()); }
-    });
-    document.querySelector<HTMLElement>('#next-page')?.addEventListener('click', event => {
-      const url = (event.currentTarget as HTMLElement).dataset.nextUrl;
-      if (url) { sessionStorage.setItem('catalogPrevious', location.pathname + location.search); location.assign(url); }
-    });
   });
 </script>

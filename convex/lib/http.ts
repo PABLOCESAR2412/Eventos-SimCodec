@@ -1,10 +1,11 @@
 import { canonicalUrl } from "./model";
 export const SOURCE_HOSTS = ["devpost.com", "api.coursera.org", "www.eventbrite.com", "www.meetup.com", "citec.com.ec", "www.espol.edu.ec", "www.uce.edu.ec"];
-export const LINK_HOSTS = [...SOURCE_HOSTS, "coursera.org", "eventbrite.com", "meetup.com", "lu.ma", "luma.com", "ekoseventos.com", "epn.edu.ec", "espol.edu.ec", "uce.edu.ec"];
+export const LINK_HOSTS = [...SOURCE_HOSTS, "coursera.org", "eventbrite.com", "eventbrite.ca", "eventbrite.co.uk", "eventbrite.com.ar", "eventbrite.cl", "eventbrite.fr", "meetup.com", "lu.ma", "luma.com", "ekoseventos.com", "epn.edu.ec", "espol.edu.ec", "uce.edu.ec"];
+export class DestinationError extends Error {}
 export function checkDestination(value: string, hosts: string[]) {
-  canonicalUrl(value); // Validate without changing a fetch path or stripping a required trailing slash.
+  try { canonicalUrl(value); } catch { throw new DestinationError("Invalid public HTTPS destination"); }
   const url = new URL(value);
-  if (!hosts.some(host => url.hostname === host || url.hostname.endsWith("." + host))) throw new Error("Host not allowed: " + url.hostname);
+  if (!hosts.some(host => url.hostname === host || url.hostname.endsWith("." + host))) throw new DestinationError("Host not allowed: " + url.hostname);
   return url.href;
 }
 export async function safeFetch(url: string, options: {

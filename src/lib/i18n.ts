@@ -1,0 +1,121 @@
+import type { Locale } from "../../shared/domain";
+export function localeForPath(path: string): Locale {
+  return /^\/en(?:\/|$)/.test(path) ? "en" : "es";
+}
+const english: Record<string, string> = {
+  "Curso a tu ritmo. Consulta acceso y condiciones en Coursera.":
+    "Self-paced course. Check access and conditions on Coursera.",
+  "Eventos Tech Ecuador | Comunidad, Meetups y Conferencias":
+    "Tech Events Ecuador | Community, Meetups and Conferences",
+  "Plataforma centralizada en tiempo real de eventos, meetups, hackathons y conferencias de tecnología en Ecuador.":
+    "Discover technology events, meetups, hackathons and conferences in Ecuador.",
+  "Explora el futuro de la": "Explore the future of",
+  "tecnología en Ecuador": "technology in Ecuador",
+  "y expande tus conocimientos": "and expand your knowledge",
+  "Plataforma B2B de Eventos Tecnológicos. Centralizando innovación, conferencias y hackathons globales.":
+    "A B2B technology events platform. Bringing together innovation, conferences and global hackathons.",
+  "Tipo de contenido": "Content type",
+  "Eventos con fecha": "Scheduled events",
+  "Cursos a tu ritmo": "Self-paced courses",
+  "Buscar cursos": "Search courses",
+  "Buscar eventos": "Search events",
+  "Busca cursos y pulsa Enter": "Search courses and press Enter",
+  "Busca eventos y pulsa Enter": "Search events and press Enter",
+  Borrar: "Clear",
+  Resultados: "Results",
+  "Esta página": "This page",
+  "Mostrar:": "Show:",
+  "Página anterior": "Previous page",
+  "Siguiente página": "Next page",
+  "No hay coincidencias. Ajusta los filtros o la búsqueda.":
+    "No matches. Adjust the filters or search.",
+  "La página ya no es válida. Vuelve al inicio de los resultados.":
+    "This page is no longer valid. Return to the first page of results.",
+  "Volver al inicio de los resultados": "Return to the first page of results",
+  "Catálogo no disponible. Vuelve a intentar en un minuto.":
+    "Catalog unavailable. Please try again in a minute.",
+  Filtros: "Filters",
+  activos: "active",
+  Limpiar: "Clear",
+  "Aplicar filtros y búsqueda": "Apply filters and search",
+  Categoría: "Category",
+  Plataformas: "Platforms",
+  Temáticas: "Topics",
+  Fecha: "Date",
+  Modalidad: "Attendance",
+  Costo: "Price",
+  Ubicación: "Location",
+  Eventos: "Events",
+  Formación: "Education",
+  Competencias: "Competitions",
+  Emprendimiento: "Entrepreneurship",
+  Financiamiento: "Funding",
+  Comunidad: "Community",
+  Empleo: "Jobs",
+  Presencial: "In person",
+  "Virtual / Online": "Online",
+  Gratuito: "Free",
+  "De Pago": "Paid",
+  "Consultar precio": "Check price",
+  "Este Mes": "This month",
+  "Próximo Mes": "Next month",
+  "Próximos 3 Meses": "Next 3 months",
+  Conferencias: "Conferences",
+  Congresos: "Congresses",
+  Charlas: "Talks",
+  Seminarios: "Seminars",
+  "Ferias Tecnológicas": "Technology fairs",
+  "Ferias Empresariales": "Business fairs",
+  Cursos: "Courses",
+  Diplomados: "Diploma programs",
+  Certificaciones: "Certifications",
+  Talleres: "Workshops",
+  "Programas de Capacitación": "Training programs",
+  Concursos: "Contests",
+  Olimpiadas: "Olympiads",
+  "Competencias de IA": "AI competitions",
+  "Competencias de Ciencia de Datos": "Data science competitions",
+  "Competencias de Programación": "Programming competitions",
+  Convocatorias: "Open calls",
+  Incubadoras: "Incubators",
+  Aceleradoras: "Accelerators",
+  Becas: "Scholarships",
+  "Fondos de Innovación": "Innovation funds",
+  "Capital Semilla": "Seed funding",
+  "Fondos de Investigación": "Research funds",
+  Mentorías: "Mentoring",
+  "Comunidades Tech": "Tech communities",
+  "Capítulos IEEE": "IEEE chapters",
+  "Ferias de Empleo": "Job fairs",
+  IA: "AI",
+  "Cerrar detalles": "Close details",
+  "Pasos para Participar": "How to participate",
+  "Ir al Sitio Web": "Visit website",
+  "Pasos para el curso": "How to join the course",
+  "Pasos para participar": "How to participate",
+  "Ir a la plataforma": "Visit platform",
+  "Ir al sitio oficial": "Visit official website",
+  "Abre el sitio oficial del organizador.":
+    "Open the organizer’s official website.",
+  "Revisa requisitos, precio y condiciones de acceso.":
+    "Check requirements, price and access conditions.",
+  "Inicia sesión en la plataforma para inscribirte.":
+    "Sign in to the platform to enroll.",
+  "Completa la inscripción y guarda la fecha y ubicación.":
+    "Complete registration and save the date and location.",
+  "A tu ritmo": "Self-paced",
+  "Sin Imagen Oficial": "No official image",
+  "EN VIVO": "LIVE",
+  "Ver detalles de": "View details for",
+  "Visite la página oficial del organizador para más detalles.":
+    "Visit the organizer’s official website for details.",
+  "Los detalles extendidos no se encuentran disponibles para este evento. Visite la página oficial mediante el botón de registro para obtener toda la información, cronogramas y requerimientos específicos.":
+    "Full details are available on the official registration website. Check the schedule and requirements there.",
+  "Cambiar tema de color": "Change color theme",
+  "Activar tema claro": "Switch to light theme",
+  "Activar tema oscuro": "Switch to dark theme",
+};
+export function translator(locale: Locale) {
+  return (value: string) =>
+    locale === "en" ? (english[value] ?? value) : value;
+}

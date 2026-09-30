@@ -2,8 +2,11 @@
 import Layout from '../layouts/Layout.astro';
 import Sidebar from '../components/Sidebar.astro';
 import EventCard from '../components/EventCard.astro';
-import { convex } from '../lib/convex';
-import { api } from '../../convex/_generated/api';
+import EventModal from '../components/EventModal.astro';
+import { translator, localeForPath } from '../lib/i18n';
+import { catalogPage, pageOffset, priceInfo } from '../../shared/domain';
+const locale = localeForPath(Astro.url.pathname), t = translator(locale);
+import { getCatalogData } from '../lib/catalog-data';
 import { catalogArgs } from '../lib/catalog';
 Astro.response.headers.set('Cache-Control', 'public, max-age=0, s-maxage=300, stale-while-revalidate=600');
 const args = catalogArgs(Astro.url.searchParams);
@@ -20,25 +23,34 @@ const viewUrl = (courses: boolean) => {
   url.searchParams.sort();
   return url.pathname + url.search;
 };
-let result;
-try { result = await convex.query(api.events.getCatalogPage, args); }
-catch {
-  return new Response('Catálogo no disponible. Vuelve a intentar en un minuto.', { status: 503, headers: { 'Cache-Control': 'no-store' } });
+let failure = '';
+let result: Awaited<ReturnType<typeof loadCatalog>>;
+async function loadCatalog() { return catalogPage(await getCatalogData(args.kind), args, args.paginationOpts.cursor, args.paginationOpts.numItems); }
+try { pageOffset(args.paginationOpts.cursor, args.paginationOpts.numItems); result = await loadCatalog(); }
+catch (error) {
+  const invalid = String(error).includes('Invalid catalog cursor');
+  Astro.response.status = invalid ? 400 : 503;
+  Astro.response.headers.set('Cache-Control', 'no-store');
+  failure = invalid ? t('La página ya no es válida. Vuelve al inicio de los resultados.') : t('Catálogo no disponible. Vuelve a intentar en un minuto.');
+  result = { page: [], total: 0, isDone: true, continueCursor: '', previousCursor: null };
 }
 const events = result.page.map(e => ({
   id: e._id, title: e.title, description: e.description, url: e.registrationUrl,
   source: e.source, category: e.category, subcategory: e.subcategory,
   location: { city: e.city || (e.isVirtual ? 'Virtual' : 'Presencial'), isVirtual: e.isVirtual, address: e.address },
   date: { start: new Date(e.dateStart), end: e.dateEnd ? new Date(e.dateEnd) : undefined },
-  kind: e.kind, isLive: false, isFree: e.isFree, price: e.price, imageUrl: e.imageUrl
+  kind: e.kind, isLive: false, isFree: e.isFree, price: e.price, priceStatus: e.priceStatus, priceAmount: e.priceAmount, priceCurrency: e.priceCurrency, imageUrl: e.imageUrl
 }));
 const nextUrl = new URL(Astro.url); nextUrl.searchParams.set('cursor', result.continueCursor);
+const previousUrl = new URL(Astro.url);
+if (result.previousCursor) previousUrl.searchParams.set('cursor', result.previousCursor); else previousUrl.searchParams.delete('cursor');
+const resetUrl = new URL(Astro.url); resetUrl.searchParams.delete('cursor');
 
 ---
 
-<Layout
-  title="Eventos Tech Ecuador | Comunidad, Meetups y Conferencias"
-  description="Plataforma centralizada en tiempo real de eventos, meetups, hackathons y conferencias de tecnología en Ecuador."
+<Layout locale={locale}
+  title={t('Eventos Tech Ecuador | Comunidad, Meetups y Conferencias')}
+  description={t('Plataforma centralizada en tiempo real de eventos, meetups, hackathons y conferencias de tecnología en Ecuador.')}
 >
   <!-- Hero Section SimCodec Branded -->
   <header class="relative pt-32 pb-20 px-6 lg:px-12 border-b border-[var(--border-color)] overflow-hidden bg-[var(--bg-color)] transition-colors duration-300">
@@ -52,12 +64,12 @@ const nextUrl = new URL(Astro.url); nextUrl.searchParams.set('cursor', result.co
       </div>
 
       <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-[var(--text-color)] tracking-tight mb-6 leading-tight transition-colors duration-300">
-        Explora el futuro de la <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-sim-primary)] to-[var(--color-sim-brand)] dark:from-[var(--color-sim-brand)] dark:to-teal-300 ml-3 transition-colors duration-300">tecnología en Ecuador</span><br />
-        y expande tus conocimientos
+        {t('Explora el futuro de la')} <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-sim-primary)] to-[var(--color-sim-brand)] dark:from-[var(--color-sim-brand)] dark:to-teal-300 ml-3 transition-colors duration-300">{t('tecnología en Ecuador')}</span><br />
+        {t('y expande tus conocimientos')}
       </h1>
 
       <p class="text-lg md:text-xl text-gray-700 dark:text-gray-400 max-w-2xl font-medium dark:font-light mb-10 transition-colors duration-300">
-        Plataforma B2B de Eventos Tecnológicos. Centralizando innovación, conferencias y hackathons globales.
+        {t('Plataforma B2B de Eventos Tecnológicos. Centralizando innovación, conferencias y hackathons globales.')}
       </p>
     </div>
   </header>
@@ -66,12 +78,12 @@ const nextUrl = new URL(Astro.url); nextUrl.searchParams.set('cursor', result.co
     <Sidebar />
 
     <div class="flex-grow min-w-0">
-      <nav aria-label="Tipo de contenido" class="flex flex-wrap gap-x-6 gap-y-2 border-b border-[var(--border-color)] mb-6">
+      <nav aria-label={t('Tipo de contenido')} class="flex flex-wrap gap-x-6 gap-y-2 border-b border-[var(--border-color)] mb-6">
         <a href={viewUrl(false)} aria-current={!isCourseView ? 'page' : undefined} class:list={['min-h-11 py-3 border-b-2 text-sm sm:text-base font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-sim-action)]', !isCourseView ? 'border-[var(--color-sim-action)] text-blue-700 dark:text-blue-300' : 'border-transparent text-[var(--text-color)] hover:border-[var(--border-color)]']}>
-          Eventos con fecha
+          {t('Eventos con fecha')}
         </a>
         <a href={viewUrl(true)} aria-current={isCourseView ? 'page' : undefined} class:list={['min-h-11 py-3 border-b-2 text-sm sm:text-base font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-sim-action)]', isCourseView ? 'border-[var(--color-sim-action)] text-blue-700 dark:text-blue-300' : 'border-transparent text-[var(--text-color)] hover:border-[var(--border-color)]']}>
-          Cursos a tu ritmo
+          {t('Cursos a tu ritmo')}
         </a>
       </nav>
       <!-- Barra de Búsqueda Dinámica -->
@@ -81,24 +93,25 @@ const nextUrl = new URL(Astro.url); nextUrl.searchParams.set('cursor', result.co
           <input
             type="text"
             id="global-search"
-            aria-label={isCourseView ? 'Buscar cursos' : 'Buscar eventos'}
-            placeholder={isCourseView ? 'Busca cursos y pulsa Enter' : 'Busca eventos y pulsa Enter'} value={args.searchTerm}
+            aria-label={isCourseView ? t('Buscar cursos') : t('Buscar eventos')}
+            placeholder={isCourseView ? t('Busca cursos y pulsa Enter') : t('Busca eventos y pulsa Enter')} value={args.searchTerm}
             class="flex-1 min-w-0 bg-transparent border-none outline-none px-4 py-2.5 text-gray-900 dark:text-white placeholder-gray-500 text-base font-medium transition-colors duration-300"
           />
           <button id="clear-search" class="hidden bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white font-bold py-2.5 px-4 rounded-lg transition-colors duration-200 uppercase text-xs tracking-wider">
-            Borrar
+            {t('Borrar')}
           </button>
         </div>
       </div>
 
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
-        <h2 class="text-2xl font-bold text-[var(--text-color)] transition-colors duration-300">{isCourseView ? 'Cursos a tu ritmo' : 'Eventos con fecha'}</h2>
-        <span id="results-count" class="text-sm font-medium text-gray-700 dark:text-gray-400 bg-gray-200 dark:bg-gray-800 px-3 py-1 rounded-full border border-gray-300 dark:border-[var(--border-color)] transition-colors duration-300" data-template="Mostrando {count} resultados en esta página">
-          Mostrando {events.length} resultados
+        <h2 class="text-2xl font-bold text-[var(--text-color)] transition-colors duration-300">{isCourseView ? t('Cursos a tu ritmo') : t('Eventos con fecha')}</h2>
+        <span id="results-count" class="text-sm font-medium text-gray-700 dark:text-gray-400 bg-gray-200 dark:bg-gray-800 px-3 py-1 rounded-full border border-gray-300 dark:border-[var(--border-color)] transition-colors duration-300">
+          {t('Resultados')}: {events.length} / {result.total}
         </span>
       </div>
 
-      {events.length === 0 && <p class="mb-6">No hay resultados en esta página. Ajusta filtros o continúa a la siguiente página.</p>}
+      {failure && <div role="alert" class="mb-6"><p>{failure}</p><a class="inline-block mt-3 underline underline-offset-4" href={resetUrl.pathname + resetUrl.search}>{t('Volver al inicio de los resultados')}</a></div>}
+      {!failure && events.length === 0 && <p class="mb-6">{t('No hay coincidencias. Ajusta los filtros o la búsqueda.')}</p>}
       <div class="events-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 transition-opacity duration-300">
         {events.map((event) => (
           <div
@@ -108,7 +121,7 @@ const nextUrl = new URL(Astro.url); nextUrl.searchParams.set('cursor', result.co
             data-subcategory={event.subcategory || ''}
             data-source={event.source}
             data-modality={event.location.isVirtual ? 'virtual' : 'presential'}
-            data-cost={event.isFree ? 'free' : 'paid'}
+            data-cost={priceInfo(event).priceStatus.toLowerCase()}
             data-date={event.date.start.getTime()}
             data-search={`${event.title} ${event.description || ''} ${event.category} ${event.subcategory || ''} ${event.source}`.toLowerCase()}
           >
@@ -120,7 +133,7 @@ const nextUrl = new URL(Astro.url); nextUrl.searchParams.set('cursor', result.co
       <!-- Pagination Controls -->
       <div id="pagination-container" class="flex flex-col md:flex-row items-center justify-between gap-4 mt-12 bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-800 rounded-2xl p-4 shadow-sm transition-colors duration-300">
         <div class="flex items-center gap-3">
-          <label for="page-size" class="text-sm font-semibold text-gray-600 dark:text-gray-400 transition-colors duration-300">Mostrar:</label>
+          <label for="page-size" class="text-sm font-semibold text-gray-600 dark:text-gray-400 transition-colors duration-300">{t('Mostrar:')}</label>
           <select id="page-size" class="bg-gray-100 dark:bg-gray-800 border-none rounded-lg text-sm font-bold text-[var(--text-color)] py-2 px-3 cursor-pointer focus:ring-2 focus:ring-[var(--color-sim-action)] transition-colors duration-300">
             <option value="12" selected={args.paginationOpts.numItems === 12}>12</option>
             <option value="24" selected={args.paginationOpts.numItems === 24}>24</option>
@@ -130,226 +143,22 @@ const nextUrl = new URL(Astro.url); nextUrl.searchParams.set('cursor', result.co
         </div>
 
         <div class="flex items-center gap-2">
-          <button id="prev-page" disabled={!args.paginationOpts.cursor} class="p-2 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300" aria-label="Página anterior">
+          <a id="prev-page" href={args.paginationOpts.cursor ? previousUrl.pathname + previousUrl.search : undefined} aria-disabled={!args.paginationOpts.cursor} class="p-2 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 aria-disabled:opacity-50 aria-disabled:cursor-not-allowed transition-colors duration-300" aria-label={t('Página anterior')}>
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-          </button>
+          </a>
 
           <div id="page-numbers" class="flex items-center gap-1 mx-2">
-            <span class="text-sm">Esta página: {events.length}</span>
+            <span class="text-sm">{t('Esta página')}: {events.length}</span>
           </div>
 
-          <button id="next-page" disabled={result.isDone} data-next-url={nextUrl.pathname + nextUrl.search} class="p-2 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300" aria-label="Siguiente página">
+          <a id="next-page" href={!result.isDone ? nextUrl.pathname + nextUrl.search : undefined} aria-disabled={result.isDone} class="p-2 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 aria-disabled:opacity-50 aria-disabled:cursor-not-allowed transition-colors duration-300" aria-label={t('Siguiente página')}>
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-          </button>
+          </a>
         </div>
       </div>
     </div>
 
-    <!-- Modal Component -->
-    <dialog id="event-modal" aria-labelledby="modal-title" data-lenis-prevent class="fixed inset-0 items-center justify-center p-4 text-[var(--text-color)]">
-      <div id="modal-backdrop" aria-hidden="true" class="absolute inset-0 bg-black/50 dark:bg-black/80 backdrop-blur-sm cursor-pointer transition-colors duration-300"></div>
-      <div class="relative bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl w-full max-w-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain shadow-2xl" id="modal-content">
-        <div class="sticky top-0 z-10 flex justify-end h-0">
-          <button id="close-modal" type="button" autofocus class="relative top-4 right-4 min-w-11 min-h-11 flex items-center justify-center bg-white/90 dark:bg-black/80 text-gray-800 dark:text-white hover:bg-white dark:hover:bg-black p-2 rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-sim-action)]" aria-label="Cerrar detalles">
-            <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-          </button>
-        </div>
-        <div id="modal-image-container" class="relative h-64 bg-gray-100 dark:bg-gray-800 transition-colors duration-300">
-          <img id="modal-img" src="/loading_logo_dark.png" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover" />
-        </div>
-        <div id="modal-details" class="p-6 sm:p-8">
-          <div class="flex gap-3 mb-4">
-            <span id="modal-city" class="text-xs font-semibold uppercase text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-400/10 px-2.5 py-1 rounded-md border border-blue-200 dark:border-transparent"></span>
-            <span id="modal-price" class="text-xs font-semibold uppercase px-2.5 py-1 rounded-md"></span>
-          </div>
-          <h2 id="modal-title" class="text-3xl font-bold text-[var(--text-color)] mb-2 leading-tight transition-colors duration-300"></h2>
-          <p id="modal-date" class="text-sm text-gray-600 dark:text-gray-400 mb-6 font-medium capitalize-first transition-colors duration-300"></p>
-          <p id="modal-desc" class="text-gray-700 dark:text-gray-300 leading-relaxed mb-6 transition-colors duration-300"></p>
-
-          <div class="bg-gray-100 dark:bg-gray-800/50 rounded-lg p-5 mb-8 border border-gray-300 dark:border-[var(--border-color)] transition-colors duration-300">
-            <h3 class="text-sm font-bold text-[var(--text-color)] uppercase tracking-wider mb-3 flex items-center gap-2 transition-colors duration-300">
-              <svg class="w-4 h-4 text-[var(--color-sim-brand)] transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              <span id="modal-instructions-title">Pasos para Participar</span>
-            </h3>
-            <ol id="modal-instructions-list" class="list-decimal list-inside space-y-2 text-sm text-gray-700 dark:text-gray-300 transition-colors duration-300">
-              <!-- Dynamically injected via JS -->
-            </ol>
-          </div>
-
-          <div class="flex justify-end pt-4 border-t border-[var(--border-color)]">
-            <a id="modal-link" href="#" target="_blank" rel="noopener noreferrer" class="bg-[var(--color-sim-action)] hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg shadow-[var(--color-sim-action)]/20 transition-all hover:scale-105 flex items-center gap-2">
-              <span id="modal-btn-text">Ir al Sitio Web</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-            </a>
-          </div>
-        </div>
-      </div>
-    </dialog>
+    <EventModal />
   </main>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Contador
-      document.addEventListener('filters:changed', (e: any) => {
-        const countEl = document.getElementById('results-count');
-        if (countEl) {
-          const template = countEl.dataset.template || 'Mostrando {count} resultados';
-          countEl.textContent = template.replace('{count}', e.detail.count);
-        }
-      });
-
-      // Modal Logic
-      const modal = document.querySelector<HTMLDialogElement>('#event-modal');
-      const modalBackdrop = document.getElementById('modal-backdrop');
-      const closeModalBtn = document.getElementById('close-modal');
-      const modalContent = document.getElementById('modal-content');
-      let opener: HTMLElement | null = null;
-      let previousOverflow = '';
-
-      const openModal = (btn: HTMLElement) => {
-        if (!modal || !modalContent || modal.open) return;
-
-        const { title, desc, url, image, city, price, date, category } = btn.dataset;
-
-        document.getElementById('modal-title')!.textContent = title || '';
-        document.getElementById('modal-desc')!.textContent = desc || '';
-        document.getElementById('modal-city')!.textContent = city || '';
-        document.getElementById('modal-date')!.textContent = date || '';
-
-        // Dynamically update instructions based on category
-        const instTitle = document.getElementById('modal-instructions-title')!;
-        const instList = document.getElementById('modal-instructions-list')!;
-        const btnText = document.getElementById('modal-btn-text')!;
-
-        if (category === 'Formación') {
-          instTitle.textContent = 'Pasos para el Curso / Capacitación';
-          instList.innerHTML = `
-            <li>Haz clic en <strong class="text-[var(--color-sim-action)]">Ir a la Plataforma</strong>.</li>
-            <li>Serás redirigido a la página oficial del curso (ej. Coursera, edX, etc).</li>
-            <li>Busca el botón "Enroll for Free" o "Inscribirse".</li>
-            <li>Inicia sesión con tu cuenta personal o corporativa para comenzar.</li>
-          `;
-          btnText.textContent = 'Ir a la Plataforma';
-        } else if (category === 'Emprendimiento' || category === 'Financiamiento') {
-          instTitle.textContent = 'Pasos para Aplicar a la Convocatoria';
-          instList.innerHTML = `
-            <li>Haz clic en <strong class="text-[var(--color-sim-action)]">Revisar Convocatoria</strong>.</li>
-            <li>Lee detenidamente las bases, requisitos y fechas límite en el sitio oficial.</li>
-            <li>Prepara la documentación o el Pitch Deck solicitado por la organización.</li>
-            <li>Haz clic en "Apply Now" o "Postular" y completa el formulario oficial.</li>
-          `;
-          btnText.textContent = 'Revisar Convocatoria';
-        } else if (category === 'Competencias') {
-          instTitle.textContent = 'Pasos para el Hackathon / Competencia';
-          instList.innerHTML = `
-            <li>Haz clic en <strong class="text-[var(--color-sim-action)]">Ver Reto Oficial</strong>.</li>
-            <li>Serás redirigido a la plataforma (ej. Devpost, Kaggle).</li>
-            <li>Lee las reglas de la competencia y los premios.</li>
-            <li>Haz clic en "Join Hackathon" o "Participar" para inscribirte y buscar equipo.</li>
-          `;
-          btnText.textContent = 'Ver Reto Oficial';
-        } else {
-          instTitle.textContent = 'Pasos para el Evento';
-          instList.innerHTML = `
-            <li>Haz clic en <strong class="text-[var(--color-sim-action)]">Obtener Tickets / RSVP</strong>.</li>
-            <li>Serás redirigido a la web del organizador.</li>
-            <li>Busca el botón "Registrarse", "Join" o "Buy Tickets".</li>
-            <li>Si es presencial, revisa bien la dirección; si es virtual, guarda el link del streaming.</li>
-          `;
-          btnText.textContent = 'Obtener Tickets / RSVP';
-        }
-
-        const priceEl = document.getElementById('modal-price')!;
-        priceEl.textContent = price || '';
-        if (price === 'GRATIS' || price === 'FREE') {
-          priceEl.className = 'text-xs font-semibold uppercase text-emerald-700 dark:text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded-md';
-        } else {
-          priceEl.className = 'text-xs font-semibold uppercase text-blue-700 dark:text-blue-400 bg-blue-400/10 px-2.5 py-1 rounded-md';
-        }
-
-        const imgContainer = document.getElementById('modal-image-container')!;
-        document.getElementById('modal-details')?.toggleAttribute('data-without-image', !image);
-        if (image) {
-          imgContainer.style.display = 'block';
-          const img = document.getElementById('modal-img') as HTMLImageElement;
-          img.src = image;
-          img.alt = title || 'Imagen del evento';
-        } else {
-          imgContainer.style.display = 'none';
-        }
-
-        (document.getElementById('modal-link') as HTMLAnchorElement).href = url || '#';
-
-        opener = btn;
-        previousOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
-        modal.showModal();
-        modalContent.scrollTop = 0;
-        closeModalBtn?.focus({ preventScroll: true });
-      };
-
-      const closeModal = () => {
-        if (modal?.open) modal.close();
-      };
-
-      modal?.addEventListener('cancel', event => {
-        event.preventDefault();
-        closeModal();
-      });
-      modal?.addEventListener('close', () => {
-        document.body.style.overflow = previousOverflow;
-        if (opener?.isConnected) opener.focus({ preventScroll: true });
-        opener = null;
-      });
-      modal?.addEventListener('keydown', event => {
-        if (event.key !== 'Tab') return;
-        const controls = [...modal.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]')].filter(control => control.getClientRects().length > 0);
-        const first = controls[0];
-        const last = controls[controls.length - 1];
-        if (first && last && (event.shiftKey ? document.activeElement === first : document.activeElement === last)) {
-          event.preventDefault();
-          (event.shiftKey ? last : first).focus();
-        }
-      });
-
-      document.querySelectorAll('.open-modal-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          openModal(btn as HTMLElement);
-        });
-      });
-
-      if (modalBackdrop) modalBackdrop.addEventListener('click', closeModal);
-      if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
-    });
-  </script>
-
-  <style>
-    #event-modal {
-      display: none;
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      max-width: none;
-      max-height: none;
-      border: 0;
-      background: transparent;
-    }
-    #event-modal[open] {
-      display: flex;
-    }
-    #event-modal::backdrop {
-      background: transparent;
-    }
-    #modal-details {
-      overflow-wrap: anywhere;
-    }
-    #modal-details[data-without-image] {
-      padding-top: 5rem;
-    }
-    .event-wrapper {
-      transition: opacity 0.25s ease-out, transform 0.25s ease-out;
-      will-change: opacity, transform;
-    }
-  </style>
 </Layout>

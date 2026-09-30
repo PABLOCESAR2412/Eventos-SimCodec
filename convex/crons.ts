@@ -7,4 +7,5 @@ crons.interval("sync-scraping-every-24-hours", { hours: 24 }, internal.actions.s
 crons.interval("validate-broken-links", { hours: 1 }, internal.actions.validateEventLinks);
 crons.interval("expire-events-and-retain-logs", { hours: 1 }, internal.maintenance.expire);
 crons.interval("archive-old-and-quarantined-events", { hours: 1 }, internal.maintenance.archive);
+crons.interval("prune-expired-rate-limits", { hours: 1 }, internal.security.prune);
 export default crons;

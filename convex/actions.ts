@@ -3,7 +3,7 @@ import type { ActionCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { BATCH_SIZE, normalizeEvent } from "./lib/model";
 import type { EventInput } from "./lib/model";
-import { safeFetch, SOURCE_HOSTS, LINK_HOSTS } from "./lib/http";
+import { safeFetch, SOURCE_HOSTS, LINK_HOSTS, DestinationError } from "./lib/http";
 import { parseDevpost, parseCoursera, parseWordpress, parseEventbrite, parseDatedRss } from "./lib/parsers";
 type Source = { name: string; url: string; parse: (body: string) => EventInput[] };
 async function sync(ctx: ActionCtx, taskName: string, sources: Source[], interval: number) {
@@ -23,7 +23,11 @@ async function sync(ctx: ActionCtx, taskName: string, sources: Source[], interva
       if (state?.etag) headers["If-None-Match"] = state.etag;
       if (state?.modified) headers["If-Modified-Since"] = state.modified;
       const response = await safeFetch(source.url, { hosts: SOURCE_HOSTS, headers, onRequest: () => { requests++; } });
-      if (response.status === 304) { processed++; counts.skipped++; details.push(source.name + ": unchanged HTTP 304"); continue; }
+      if (response.status === 304) {
+        await ctx.runMutation(internal.sources.record, { url: source.url, failed: false,
+          etag: response.headers.get("etag")?.slice(0, 500), modified: response.headers.get("last-modified")?.slice(0, 100) });
+        processed++; counts.skipped++; details.push(source.name + ": unchanged HTTP 304"); continue;
+      }
       const retry = response.headers.get("retry-after");
       if (retry) retryAfterMs = /^\d+$/.test(retry) ? Number(retry) * 1000 : Math.max(0, Date.parse(retry) - Date.now());
       if (response.status < 200 || response.status >= 300) throw new Error("HTTP " + response.status);
@@ -104,14 +108,14 @@ export const validateEventLinks = internalAction({
         if (status === 405) {
           status = (await safeFetch(event.registrationUrl, { hosts: LINK_HOSTS, maxBytes: 300_000, timeoutMs: 4000, onRequest: () => { requests++; } })).status;
         }
-      } catch { /* Network errors remain retryable; they never hide an event immediately. */ }
+      } catch (error) { if (error instanceof DestinationError) status = -1; }
       results.push({ id: event._id, status, checkedAt: Date.now() });
     }
     const invalid = results.length ? await ctx.runMutation(internal.events.recordLinkResults, { results }) : 0;
-    await ctx.runMutation(internal.events.recordJob, { taskName: "validateEventLinks", status: results.some(r => !r.status || r.status >= 400) ? "PARTIAL" : "SUCCESS",
+    await ctx.runMutation(internal.events.recordJob, { taskName: "validateEventLinks", status: results.some(r => r.status <= 0 || r.status >= 400) ? "PARTIAL" : "SUCCESS",
       eventsAdded: 0, eventsUpdated: results.length, eventsSkipped: events.length - results.length, eventsRejected: invalid,
       durationMs: Date.now() - started, requests, nextRunAt: started + 3_600_000,
-      details: results.length + " links checked; " + invalid + " unavailable after repeated 404/410" });
+      details: results.length + " links checked; " + invalid + " unavailable after repeated 404/410; " + results.filter(r => r.status === -1).length + " destinations require policy review (automatic retry stopped)" });
     return { checked: results.length, invalid };
   },
 });

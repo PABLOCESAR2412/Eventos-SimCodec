@@ -1,5 +1,7 @@
 import { XMLParser, XMLValidator } from "fast-xml-parser";
 import type { EventInput } from "./model";
+import { numericPrice } from "../../shared/domain";
+import { providerDate } from "./dates";
 type Row = Record<string, unknown>;
 const row = (value: unknown): Row => value && typeof value === "object" && !Array.isArray(value) ? value as Row : {};
 const text = (value: unknown, limit = 300): string => typeof value === "string" ? value.replace(/<[^>]*>/g, "").trim().slice(0, limit) : "";
@@ -55,12 +57,11 @@ export function parseWordpress(body: string, source: string): EventInput[] {
   return array(data.events).map(value => {
     const event = row(value), venue = row(event.venue);
     // WordPress's UTC fields avoid timezone-dependent interpretation.
-    const start = text(event.utc_start_date).replace(" ", "T");
-    const end = text(event.utc_end_date).replace(" ", "T");
-    const endTime = date(end ? end + "Z" : event.end_date);
+    const startTime = providerDate(event.utc_start_date, event.start_date, event.timezone);
+    const endTime = providerDate(event.utc_end_date, event.end_date, event.timezone);
     return { ...base(source), externalId: "wp-" + text(event.url, 2000), title: text(event.title),
       description: text(event.description, 3000), registrationUrl: text(event.url, 2048),
-      dateStart: date(start ? start + "Z" : event.start_date),
+      dateStart: startTime,
       dateEnd: Number.isFinite(endTime) ? endTime : undefined,
       country: "Ecuador", city: text(venue.city) || "Varias", isVirtual: !venue.city,
       imageUrl: text(row(event.image).url, 2048) || undefined, language: "es", tags: [source] };
@@ -95,8 +96,7 @@ export function parseEventbrite(body: string): EventInput[] {
       dateStart: date(item.startDate), dateEnd: Number.isFinite(end) ? end : undefined,
       country: virtual ? "Global" : text(row(row(item.location).address).addressCountry) || "Ecuador",
       city: virtual ? "Virtual" : text(row(row(item.location).address).addressLocality) || "Varias",
-      isVirtual: virtual, isFree: offers.price !== undefined && Number(offers.price) === 0,
-      price: offers.price !== undefined ? text(String(offers.price) + " " + (offers.priceCurrency ?? "USD")) : "Consultar valor",
+      isVirtual: virtual, ...numericPrice(offers.price, offers.priceCurrency),
       imageUrl: text(Array.isArray(item.image) ? item.image[0] : item.image, 2048) || undefined, tags: ["Eventbrite"] };
   });
 }

@@ -11,10 +11,12 @@
 import type * as actions from "../actions.js";
 import type * as crons from "../crons.js";
 import type * as events from "../events.js";
+import type * as lib_dates from "../lib/dates.js";
 import type * as lib_http from "../lib/http.js";
 import type * as lib_model from "../lib/model.js";
 import type * as lib_parsers from "../lib/parsers.js";
 import type * as maintenance from "../maintenance.js";
+import type * as security from "../security.js";
 import type * as sources from "../sources.js";
 
 import type {
@@ -27,10 +29,12 @@ declare const fullApi: ApiFromModules<{
   actions: typeof actions;
   crons: typeof crons;
   events: typeof events;
+  "lib/dates": typeof lib_dates;
   "lib/http": typeof lib_http;
   "lib/model": typeof lib_model;
   "lib/parsers": typeof lib_parsers;
   maintenance: typeof maintenance;
+  security: typeof security;
   sources: typeof sources;
 }>;
 
